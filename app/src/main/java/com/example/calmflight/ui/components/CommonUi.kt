@@ -3,6 +3,8 @@ package com.example.calmflight.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -12,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.calmflight.R
@@ -20,6 +23,58 @@ import com.example.calmflight.ui.theme.NavyDeep
 import com.example.calmflight.ui.theme.NavyLight
 import com.example.calmflight.ui.theme.TealSoft
 import kotlin.math.roundToInt
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StandardTopBar(
+    title: String,
+    onBackClick: (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        title = {
+            ScreenTitle(
+                text = title,
+                color = BeigeWarm,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        navigationIcon = {
+            if (onBackClick != null) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.previous),
+                        tint = BeigeWarm
+                    )
+                }
+            }
+        },
+        actions = actions,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = NavyDeep
+        ),
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StandardTopBar(
+    titleRes: Int,
+    onBackClick: (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    StandardTopBar(
+        title = stringResource(titleRes),
+        onBackClick = onBackClick,
+        actions = actions,
+        modifier = modifier
+    )
+}
 
 @Composable
 fun ScreenTitle(
@@ -34,6 +89,8 @@ fun ScreenTitle(
         color = color,
         fontWeight = FontWeight.Bold,
         textAlign = textAlign,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier
     )
 }

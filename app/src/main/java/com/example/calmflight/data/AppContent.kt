@@ -36,7 +36,8 @@ object AppContent {
                 LearnItem("flight_6", R.string.flight_q6, R.string.flight_a6),
                 LearnItem("flight_7", R.string.flight_q7, R.string.flight_a7),
                 LearnItem("flight_8", R.string.flight_q8, R.string.flight_a8),
-                LearnItem("flight_9", R.string.flight_q9, R.string.flight_a9)
+                LearnItem("flight_9", R.string.flight_q9, R.string.flight_a9),
+                LearnItem("flight_10", R.string.flight_q10, R.string.flight_a10)
             )
         ),
         LearnSection(
@@ -63,35 +64,16 @@ object AppContent {
         Category("D", "Mechanical & What Ifs", "Safety systems"),
         Category("E", "Crew & Protocol", "Pilots and Flight Attendants")
     )
-
-    val questions = listOf(
-        // A
-        Question("1", "Did we just drop?", "It likely dropped less than 10 feet. Turbulence feels much worse than it is.", "A"),
-        Question("2", "Can wings snap?", "No. Wings are designed to bend up to 45 degrees; flexibility prevents breaking.", "A"),
-        Question("3", "What is Clear Air Turbulence?", "Turbulence that happens in clear air without clouds, often due to jet streams. It's normal.", "A"),
-        // B
-        Question("4", "Loud thud after takeoff?", "That is the landing gear retracting into the fuselage. Perfectly normal.", "B"),
-        Question("5", "Engines went quiet?", "Noise abatement or thrust reduction after reaching safe altitude. Not a stall.", "B"),
-        Question("6", "Barking dog sound?", "Hydraulic Power Transfer Unit (PTU) on Airbus planes. It balances pressure.", "B"),
-        // C
-        Question("7", "Can lightning bring a plane down?", "No. Planes are Faraday cages; lightning passes around the skin and exits.", "C"),
-        Question("8", "How can pilots see in fog?", "They use Instrument Landing Systems (ILS) which guide the plane via radio signals.", "C"),
-        // D
-        Question("9", "Can a door open mid-flight?", "No. Cabin pressure holds the door shut with thousands of pounds of force.", "D"),
-        Question("10", "What if autopilot fails?", "Pilots are fully trained to fly manually at any time.", "D"),
-        // E
-        Question("11", "Do pilots sleep?", "On long flights, there are relief pilots. At least one pilot is always alert.", "E"),
-        Question("12", "Why do flight attendants buckle up?", "Ideally for their safety during expected turbulence, just like you.", "E")
-    )
+    
 
     val tools = listOf(
-        Tool("1", "Guided Breathing", "5 min relaxation", "Breathing"),
         Tool("3", "G-Force Monitor", "Visual proof of stability", "Graph"),
-        Tool("4", "Fact Checker", "Validate your fears", "Check"),
         Tool("5", "Riding The Wave", "Stop a panic attack", "Wave"),
         Tool("6", "Postpone the Worry", "Stop 'what-if' thoughts", "Clock"),
         Tool("7", "Worry Olympics", "Exaggerate fears to reduce them", "Trophy"),
-        Tool("8", "Facing the Fear", "Fly into the cloud", "Cloud")
+        Tool("8", "Facing the Fear", "Fly into the cloud", "Cloud"),
+        Tool("9", "Reality Check", "Compare your fear vs reality", "Chart"),
+        Tool("10", "Safety Facts", "See why flying is safe", "Shield"),
+        Tool("11", "Acceptance Meditation", "Work with anxiety, not against it", "Meditation")
     )
 }
-

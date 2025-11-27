@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +18,7 @@ import com.example.calmflight.R
 import com.example.calmflight.ui.components.GForceExplanationCard
 import com.example.calmflight.ui.components.GForceMonitorCard
 import com.example.calmflight.ui.components.ScreenTitle
+import com.example.calmflight.ui.components.StandardTopBar
 import com.example.calmflight.ui.theme.BeigeWarm
 import com.example.calmflight.ui.theme.NavyDeep
 
@@ -26,48 +28,32 @@ fun GForceScreen(
 ) {
     val scrollState = rememberScrollState()
     
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(NavyDeep)
-            .padding(16.dp)
-    ) {
-        // Header with Back Button
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.previous),
-                    tint = BeigeWarm
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            ScreenTitle(
-                text = stringResource(R.string.g_force_monitor),
-                color = BeigeWarm,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Start
+    Scaffold(
+        topBar = {
+            StandardTopBar(
+                title = stringResource(R.string.g_force_monitor),
+                onBackClick = onBack
             )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Scrollable content
+        },
+        containerColor = NavyDeep
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            
             // Monitor Card
             GForceMonitorCard()
             
             // Explanation Card
             GForceExplanationCard()
+            
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

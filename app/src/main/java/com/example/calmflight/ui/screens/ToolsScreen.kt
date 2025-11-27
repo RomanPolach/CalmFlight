@@ -16,11 +16,16 @@ import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Waves
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,12 +39,15 @@ import androidx.compose.ui.unit.dp
 import com.example.calmflight.R
 import com.example.calmflight.model.Tool
 import com.example.calmflight.ui.components.ScreenTitle
+import com.example.calmflight.ui.components.StandardTopBar
 import com.example.calmflight.ui.theme.BeigeWarm
+import com.example.calmflight.ui.theme.NavyDeep
 import com.example.calmflight.ui.theme.NavyLight
 import com.example.calmflight.ui.theme.TealSoft
 import com.example.calmflight.viewmodel.ToolsViewModel
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolsScreen(
     viewModel: ToolsViewModel = koinViewModel(),
@@ -47,22 +55,23 @@ fun ToolsScreen(
 ) {
     val tools by viewModel.tools.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        ScreenTitle(
-            text = stringResource(R.string.tools_title),
-            color = BeigeWarm,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
+    Scaffold(
+        topBar = {
+            StandardTopBar(
+                titleRes = R.string.nav_tools,
+                onBackClick = null
+            )
+        },
+        containerColor = NavyDeep
+    ) { paddingValues ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             items(tools) { tool ->
                 ToolCard(tool, onClick = { onNavigateToTool(tool.id) })
@@ -102,6 +111,9 @@ fun ToolCard(tool: Tool, onClick: () -> Unit) {
                         "Clock" -> Icons.Default.AccessTime
                         "Trophy" -> Icons.Default.EmojiEvents
                         "Cloud" -> Icons.Default.Cloud
+                        "Chart" -> Icons.Default.DateRange
+                        "Shield" -> Icons.Default.Shield
+                        "Meditation" -> Icons.Default.SelfImprovement
                         else -> Icons.Default.QuestionMark
                     }, 
                     contentDescription = null,

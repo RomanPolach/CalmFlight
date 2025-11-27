@@ -62,49 +62,54 @@ fun RidingTheWaveScreen(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(NavyDeep)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Content Area
+    Scaffold(
+        topBar = {
+            StandardTopBar(
+                title = stringResource(R.string.rtw_title),
+                onBackClick = onFinish
+            )
+        },
+        containerColor = NavyDeep
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
-            
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
+            // Content Area
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ScreenTitle(text = stringResource(R.string.rtw_title))
+                Spacer(modifier = Modifier.height(20.dp))
                 
-                Spacer(modifier = Modifier.width(16.dp))
-                
-                // TTS Button next to title
-                IconButton(
-                    onClick = { viewModel.toggleTts(currentText) },
-                    modifier = Modifier
-                        .size(48.dp) // Bigger touch target
-                        .background(NavyLight, shape = MaterialTheme.shapes.medium)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        imageVector = if (isSpeaking) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
-                        contentDescription = "Read aloud",
-                        tint = TealSoft,
-                        modifier = Modifier.size(28.dp) // Bigger icon
-                    )
+                    // TTS Button
+                    IconButton(
+                        onClick = { viewModel.toggleTts(currentText) },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(NavyLight, shape = MaterialTheme.shapes.medium)
+                    ) {
+                        Icon(
+                            imageVector = if (isSpeaking) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
+                            contentDescription = "Read aloud",
+                            tint = TealSoft,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
-            }
-            
-            Spacer(modifier = Modifier.height(30.dp))
+                
+                Spacer(modifier = Modifier.height(30.dp))
             
             ContentCard(text = currentText)
 
@@ -127,5 +132,6 @@ fun RidingTheWaveScreen(
             onFinish = { viewModel.finishSession(onFinish) },
             feedbackMessageRes = feedbackRes
         )
+        }
     }
 }

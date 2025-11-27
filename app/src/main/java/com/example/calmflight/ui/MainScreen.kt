@@ -1,9 +1,14 @@
 package com.example.calmflight.ui
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlightTakeoff
@@ -55,77 +60,109 @@ fun MainScreen(
         )
     }
 
+    // Check if current route is a root tab screen
+    val isRootTabScreen = currentRoute in listOf(
+        BottomNavItem.Cockpit.route,
+        BottomNavItem.Learn.route,
+        BottomNavItem.Sos.route,
+        BottomNavItem.Tools.route
+    )
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0), // Let us handle insets manually
         bottomBar = {
-            NavigationBar(
-                containerColor = NavyDeep,
-                contentColor = BeigeWarm
-            ) {
-                val items = listOf(
-                    BottomNavItem.Cockpit,
-                    BottomNavItem.Learn,
-                    null, // Placeholder for FAB
-                    BottomNavItem.Sos,
-                    BottomNavItem.Tools
-                )
-                
-                items.forEach { item ->
-                    if (item == null) {
-                        // Placeholder for the FAB in the middle
-                        NavigationBarItem(
-                            selected = false,
-                            onClick = { },
-                            icon = { },
-                            enabled = false
-                        )
-                    } else {
-                        NavigationBarItem(
-                            icon = { Icon(item.icon, contentDescription = stringResource(item.titleRes)) },
-                            label = { Text(stringResource(item.titleRes)) },
-                            selected = currentRoute == item.route,
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = NavyDeep,
-                                selectedTextColor = TealSoft,
-                                indicatorColor = TealSoft,
-                                unselectedIconColor = BeigeWarm.copy(alpha = 0.6f),
-                                unselectedTextColor = BeigeWarm.copy(alpha = 0.6f)
-                            ),
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    navController.graph.startDestinationRoute?.let { route ->
-                                        popUpTo(route) {
-                                            saveState = true
+            if (isRootTabScreen) {
+                NavigationBar(
+                    containerColor = NavyDeep,
+                    contentColor = BeigeWarm
+                ) {
+                    val items = listOf(
+                        BottomNavItem.Cockpit,
+                        BottomNavItem.Learn,
+                        null, // Placeholder for FAB
+                        BottomNavItem.Sos,
+                        BottomNavItem.Tools
+                    )
+                    
+                    items.forEach { item ->
+                        if (item == null) {
+                            // Placeholder for the FAB in the middle
+                            NavigationBarItem(
+                                selected = false,
+                                onClick = { },
+                                icon = { },
+                                enabled = false
+                            )
+                        } else {
+                            NavigationBarItem(
+                                icon = { Icon(item.icon, contentDescription = stringResource(item.titleRes)) },
+                                label = { Text(stringResource(item.titleRes)) },
+                                selected = currentRoute == item.route,
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = NavyDeep,
+                                    selectedTextColor = TealSoft,
+                                    indicatorColor = TealSoft,
+                                    unselectedIconColor = BeigeWarm.copy(alpha = 0.6f),
+                                    unselectedTextColor = BeigeWarm.copy(alpha = 0.6f)
+                                ),
+                                onClick = {
+                                    navController.navigate(item.route) {
+                                        navController.graph.startDestinationRoute?.let { route ->
+                                            popUpTo(route) {
+                                                saveState = true
+                                            }
                                         }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showDialog = true },
-                containerColor = if (isFlightActive) OrangeSafe else NavyLight,
-                contentColor = if (isFlightActive) NavyDeep else TealSoft,
-                shape = CircleShape,
-                modifier = Modifier
-                    .size(72.dp)
-                    .offset(y = 48.dp) // Push it down into the bottom bar gap
-            ) {
-                Icon(
-                    imageVector = if (isFlightActive) Icons.Default.FlightLand else Icons.Default.FlightTakeoff,
-                    contentDescription = stringResource(if (isFlightActive) R.string.end_flight_btn else R.string.start_flight_btn),
-                    modifier = Modifier.size(32.dp)
-                )
+            if (isRootTabScreen) {
+                FloatingActionButton(
+                    onClick = { showDialog = true },
+                    containerColor = if (isFlightActive) OrangeSafe else NavyLight,
+                    contentColor = if (isFlightActive) NavyDeep else TealSoft,
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .offset(y = 48.dp) // Push it down into the bottom bar gap
+                ) {
+                    Icon(
+                        imageVector = if (isFlightActive) Icons.Default.FlightLand else Icons.Default.FlightTakeoff,
+                        contentDescription = stringResource(if (isFlightActive) R.string.end_flight_btn else R.string.start_flight_btn),
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.Center
     ) { innerPadding ->
-        NavigationGraph(navController = navController, modifier = Modifier.padding(innerPadding))
+        // Calculate adjusted padding to account for FAB extending into content area
+        // Only add FAB padding when both bottom bar and FAB are visible
+        val bottomPadding = if (isRootTabScreen) {
+            innerPadding.calculateBottomPadding() + 48.dp // Bottom bar + FAB offset
+        } else {
+            innerPadding.calculateBottomPadding() // No FAB, no extra padding needed
+        }
+        val adjustedPadding = androidx.compose.foundation.layout.PaddingValues(
+            start = innerPadding.calculateStartPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+            top = innerPadding.calculateTopPadding(),
+            end = innerPadding.calculateEndPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+            bottom = bottomPadding
+        )
+        
+        NavigationGraph(
+            navController = navController, 
+            modifier = Modifier
+                .padding(adjustedPadding)
+                .consumeWindowInsets(adjustedPadding)
+        )
     }
 }

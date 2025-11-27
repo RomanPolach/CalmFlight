@@ -66,14 +66,23 @@ fun GuidedInterventionScreen(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(NavyDeep)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
+    Scaffold(
+        topBar = {
+            StandardTopBar(
+                title = stringResource(titleRes),
+                onBackClick = onFinish
+            )
+        },
+        containerColor = NavyDeep
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -87,19 +96,15 @@ fun GuidedInterventionScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                ScreenTitle(
-                    text = stringResource(titleRes),
-                    color = TealSoft,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                Spacer(modifier = Modifier.width(8.dp))
                 IconButton(
                     onClick = { viewModel.toggleTts(currentText) },
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(NavyLight, shape = MaterialTheme.shapes.medium)
                 ) {
                     Icon(
                         imageVector = if (isSpeaking) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
-                        contentDescription = "",
+                        contentDescription = "Read aloud",
                         tint = TealSoft,
                         modifier = Modifier.size(28.dp)
                     )
@@ -131,6 +136,7 @@ fun GuidedInterventionScreen(
             onFinish = { viewModel.finishSession(onFinish) },
             feedbackMessageRes = feedbackRes
         )
+        }
     }
 }
 

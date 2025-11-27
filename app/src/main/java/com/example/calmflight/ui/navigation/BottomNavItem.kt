@@ -22,6 +22,9 @@ sealed class Screen(val route: String) {
     object PostponeTheWorry : Screen("postpone_the_worry")
     object WorryOlympics : Screen("worry_olympics")
     object FacingTheFear : Screen("facing_the_fear")
+    object RealityCheck : Screen("reality_check")
+    object SafetyFacts : Screen("safety_facts")
+    object AcceptanceMeditation : Screen("acceptance_meditation")
     object LearnDetail : Screen("learn_detail/{itemId}") {
         fun createRoute(itemId: String) = "learn_detail/$itemId"
     }

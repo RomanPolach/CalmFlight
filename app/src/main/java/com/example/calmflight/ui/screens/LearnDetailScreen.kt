@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.example.calmflight.model.LearnItem
 import com.example.calmflight.ui.components.ContentCard
 import com.example.calmflight.ui.components.ScreenTitle
+import com.example.calmflight.ui.components.StandardTopBar
 import com.example.calmflight.ui.theme.BeigeWarm
 import com.example.calmflight.ui.theme.NavyDeep
 import com.example.calmflight.ui.theme.TealSoft
@@ -27,39 +28,23 @@ fun LearnDetailScreen(
     item: LearnItem,
     onBack: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(NavyDeep)
-    ) {
-        // Top bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = TealSoft
-                )
-            }
-        }
-
+    Scaffold(
+        topBar = {
+            StandardTopBar(
+                title = stringResource(item.questionRes),
+                onBackClick = onBack
+            )
+        },
+        containerColor = NavyDeep
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)
                 .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            // Question
-            ScreenTitle(
-                text = stringResource(item.questionRes),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Answer Card using ContentCard for consistent styling
             ContentCard(text = item.answer())

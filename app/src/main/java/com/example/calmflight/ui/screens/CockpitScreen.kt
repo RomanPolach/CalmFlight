@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -29,9 +30,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.calmflight.R
+import com.example.calmflight.data.AppContent
 import com.example.calmflight.model.FlightStatus
 import com.example.calmflight.ui.components.GForceMonitorCard
 import com.example.calmflight.ui.components.ScreenTitle
+import com.example.calmflight.ui.components.StandardTopBar
 import com.example.calmflight.ui.components.WeatherWidget
 import com.example.calmflight.ui.theme.BeigeWarm
 import com.example.calmflight.ui.theme.NavyDeep
@@ -41,14 +44,16 @@ import com.example.calmflight.viewmodel.CockpitViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CockpitScreen(
     viewModel: CockpitViewModel = koinViewModel(),
     onNavigateToSos: () -> Unit,
-    onNavigateToTool: (String) -> Unit
+    onNavigateToTool: (String) -> Unit,
+    onNavigateToLearn: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isFlightActive by viewModel.isFlightActive.collectAsState()
     
     val phases = remember {
         listOf(
@@ -75,29 +80,28 @@ fun CockpitScreen(
         viewModel.setStatus(phases[pagerState.currentPage])
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ScreenTitle(
-                text = stringResource(R.string.cockpit_title),
-                color = BeigeWarm,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Start
+    Scaffold(
+        topBar = {
+            StandardTopBar(
+                title = stringResource(R.string.cockpit_title),
+                onBackClick = null,
+                actions = {
+                    IconButton(onClick = { /* Settings */ }) {
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings), tint = BeigeWarm)
+                    }
+                }
             )
-            IconButton(onClick = { /* Settings */ }) {
-                Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings), tint = BeigeWarm)
-            }
-        }
-
-        // Phase Tabs
+        },
+        containerColor = NavyDeep
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Phase Tabs
         ScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
             containerColor = Color.Transparent,
@@ -142,16 +146,27 @@ fun CockpitScreen(
                     FlightStatus.BOARDING -> BoardingContent(
                         onNavigateToTool = onNavigateToTool,
                         weatherState = uiState.weather,
-                        onFetchWeather = viewModel::fetchWeather
+                        onFetchWeather = viewModel::fetchWeather,
+                        isFlightActive = isFlightActive
                     )
-                    FlightStatus.TAKEOFF -> TakeoffContent(onNavigateToTool)
-                    FlightStatus.CRUISE -> CruiseContent(onNavigateToTool)
-                    FlightStatus.LANDING -> LandingContent(onNavigateToTool)
+                    FlightStatus.TAKEOFF -> TakeoffContent(
+                        onNavigateToTool = onNavigateToTool,
+                        onNavigateToLearn = onNavigateToLearn
+                    )
+                    FlightStatus.CRUISE -> CruiseContent(
+                        onNavigateToTool = onNavigateToTool,
+                        onNavigateToLearn = onNavigateToLearn
+                    )
+                    FlightStatus.LANDING -> LandingContent(
+                        onNavigateToTool = onNavigateToTool,
+                        onNavigateToLearn = onNavigateToLearn
+                    )
                     else -> {}
                 }
                 
                 Spacer(modifier = Modifier.height(20.dp))
             }
+        }
         }
     }
 }
@@ -160,7 +175,8 @@ fun CockpitScreen(
 fun BoardingContent(
     onNavigateToTool: (String) -> Unit,
     weatherState: com.example.calmflight.model.WeatherUiState?,
-    onFetchWeather: (Double, Double) -> Unit
+    onFetchWeather: (Double, Double) -> Unit,
+    isFlightActive: Boolean
 ) {
     // 1. Weather Widget
     WeatherWidget(
@@ -169,11 +185,14 @@ fun BoardingContent(
     )
     
     // 2. OnLandCard ("Ready to fly?")
-    OnLandCard()
+    OnLandCard(isFlightActive = isFlightActive)
 }
 
 @Composable
-fun TakeoffContent(onNavigateToTool: (String) -> Unit) {
+fun TakeoffContent(
+    onNavigateToTool: (String) -> Unit,
+    onNavigateToLearn: (String) -> Unit
+) {
     // G-Force Monitor
     GForceMonitorCard()
     
@@ -191,10 +210,20 @@ fun TakeoffContent(onNavigateToTool: (String) -> Unit) {
         icon = Icons.Default.GraphicEq,
         onClick = { onNavigateToTool("5") }
     )
+    
+    // Learn Questions Section
+    LearnQuestionsSection(
+        sectionId = "takeoff",
+        titleRes = R.string.learn_section_takeoff,
+        onNavigateToLearn = onNavigateToLearn
+    )
 }
 
 @Composable
-fun CruiseContent(onNavigateToTool: (String) -> Unit) {
+fun CruiseContent(
+    onNavigateToTool: (String) -> Unit,
+    onNavigateToLearn: (String) -> Unit
+) {
     // Systems Normal Card
     SystemsStatusCard()
     
@@ -215,10 +244,20 @@ fun CruiseContent(onNavigateToTool: (String) -> Unit) {
         icon = Icons.Default.ArrowForward,
         onClick = { onNavigateToTool("8") }
     )
+    
+    // Learn Questions Section
+    LearnQuestionsSection(
+        sectionId = "flight",
+        titleRes = R.string.learn_section_flight,
+        onNavigateToLearn = onNavigateToLearn
+    )
 }
 
 @Composable
-fun LandingContent(onNavigateToTool: (String) -> Unit) {
+fun LandingContent(
+    onNavigateToTool: (String) -> Unit,
+    onNavigateToLearn: (String) -> Unit
+) {
     // G-Force Monitor
     GForceMonitorCard()
     
@@ -235,6 +274,13 @@ fun LandingContent(onNavigateToTool: (String) -> Unit) {
         description = stringResource(R.string.tool_shortcut_desc_rtw_landing),
         icon = Icons.Default.GraphicEq,
         onClick = { onNavigateToTool("5") }
+    )
+    
+    // Learn Questions Section
+    LearnQuestionsSection(
+        sectionId = "landing",
+        titleRes = R.string.learn_section_landing,
+        onNavigateToLearn = onNavigateToLearn
     )
 }
 
@@ -338,7 +384,7 @@ fun SystemsStatusCard() {
 }
 
 @Composable
-fun OnLandCard() {
+fun OnLandCard(isFlightActive: Boolean) {
     Card(
         colors = CardDefaults.cardColors(containerColor = NavyLight),
         modifier = Modifier
@@ -353,7 +399,10 @@ fun OnLandCard() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.on_land_card_title),
+                text = stringResource(
+                    if (isFlightActive) R.string.on_land_card_title_active 
+                    else R.string.on_land_card_title
+                ),
                 style = MaterialTheme.typography.headlineMedium,
                 color = TealSoft,
                 fontWeight = FontWeight.Bold
@@ -362,7 +411,10 @@ fun OnLandCard() {
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = stringResource(R.string.on_land_card_desc),
+                text = stringResource(
+                    if (isFlightActive) R.string.on_land_card_desc_active 
+                    else R.string.on_land_card_desc
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 color = BeigeWarm,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -377,5 +429,76 @@ fun OnLandCard() {
                 modifier = Modifier.size(48.dp)
             )
         }
+    }
+}
+
+@Composable
+fun LearnQuestionsSection(
+    sectionId: String,
+    titleRes: Int,
+    onNavigateToLearn: (String) -> Unit
+) {
+    val section = AppContent.learnSections.find { it.id == sectionId }
+    
+    if (section != null) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(titleRes),
+                style = MaterialTheme.typography.titleMedium,
+                color = BeigeWarm,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            
+            Card(
+                colors = CardDefaults.cardColors(containerColor = NavyLight),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    section.items.forEach { item ->
+                        QuestionListItem(
+                            question = stringResource(item.questionRes),
+                            onClick = { onNavigateToLearn(item.id) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun QuestionListItem(
+    question: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = question,
+            style = MaterialTheme.typography.bodyMedium,
+            color = BeigeWarm,
+            modifier = Modifier.weight(1f)
+        )
+        
+        Spacer(modifier = Modifier.width(8.dp))
+        
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = TealSoft.copy(alpha = 0.6f)
+        )
     }
 }

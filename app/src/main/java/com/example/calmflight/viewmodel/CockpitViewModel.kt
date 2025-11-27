@@ -22,14 +22,8 @@ class CockpitViewModel(
     
     private val _uiState = MutableStateFlow(CockpitUiState())
     val uiState: StateFlow<CockpitUiState> = _uiState.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            flightModeManager.isFlightActive.collect { isActive ->
-                // Logic to handle flight active state if needed
-            }
-        }
-    }
+    
+    val isFlightActive: StateFlow<Boolean> = flightModeManager.isFlightActive
 
     fun setStatus(newStatus: FlightStatus) {
         _uiState.update { it.copy(status = newStatus) }

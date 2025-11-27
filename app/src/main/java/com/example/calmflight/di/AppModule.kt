@@ -12,6 +12,7 @@ import com.example.calmflight.viewmodel.RidingTheWaveViewModel
 import com.example.calmflight.viewmodel.SosViewModel
 import com.example.calmflight.viewmodel.ToolsViewModel
 import com.example.calmflight.viewmodel.MainViewModel
+import com.example.calmflight.viewmodel.RealityCheckViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -56,4 +57,5 @@ val appModule = module {
     viewModel { ToolsViewModel() }
     viewModel { RidingTheWaveViewModel(get()) }
     viewModel { GuidedInterventionViewModel(get()) }
+    viewModel { RealityCheckViewModel(get()) }
 }

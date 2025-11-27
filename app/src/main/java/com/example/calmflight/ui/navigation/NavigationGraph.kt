@@ -37,6 +37,9 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                         "7" -> navController.navigate(Screen.WorryOlympics.route)
                         "8" -> navController.navigate(Screen.FacingTheFear.route)
                     }
+                },
+                onNavigateToLearn = { itemId ->
+                    navController.navigate(Screen.LearnDetail.createRoute(itemId))
                 }
             )
         }
@@ -84,6 +87,9 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                         "6" -> navController.navigate(Screen.PostponeTheWorry.route)
                         "7" -> navController.navigate(Screen.WorryOlympics.route)
                         "8" -> navController.navigate(Screen.FacingTheFear.route)
+                        "9" -> navController.navigate(Screen.RealityCheck.route)
+                        "10" -> navController.navigate(Screen.SafetyFacts.route)
+                        "11" -> navController.navigate(Screen.AcceptanceMeditation.route)
                     }
                 }
             )
@@ -151,6 +157,38 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
             )
             GuidedInterventionScreen(
                 titleRes = R.string.ftf_title,
+                steps = steps,
+                onFinish = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(Screen.RealityCheck.route) {
+            com.example.calmflight.ui.screens.RealityCheckScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(Screen.SafetyFacts.route) {
+            com.example.calmflight.ui.screens.SafetyFactsScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(Screen.AcceptanceMeditation.route) {
+            val steps = listOf(
+                R.string.am_intro,
+                R.string.am_step_1,
+                R.string.am_step_2,
+                R.string.am_step_3,
+                R.string.am_step_4,
+                R.string.am_step_5,
+                R.string.am_step_6
+            )
+            GuidedInterventionScreen(
+                titleRes = R.string.am_title,
                 steps = steps,
                 onFinish = {
                     navController.popBackStack()
