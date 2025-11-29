@@ -1,11 +1,7 @@
 package com.example.calmflight.ui.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,7 +24,6 @@ import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,10 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -67,7 +59,6 @@ import com.example.calmflight.viewmodel.CockpitViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CockpitScreen(
     viewModel: CockpitViewModel = koinViewModel(),
@@ -345,61 +336,6 @@ fun ToolShortcutCard(
                 contentDescription = null,
                 tint = BeigeWarm.copy(alpha = 0.5f)
             )
-        }
-    }
-}
-
-@Composable
-fun SystemsStatusCard() {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Background Image
-            Image(
-                painter = painterResource(id = R.drawable.cruise),
-                contentDescription = stringResource(R.string.calm_flight_desc),
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-
-            // Gradient Overlay for readability
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                NavyDeep.copy(alpha = 0.8f)
-                            ),
-                            startY = 0f
-                        )
-                    )
-            )
-
-            // Text Content
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(24.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.all_systems_normal),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = BeigeWarm,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.cruising_smoothly),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = BeigeWarm.copy(alpha = 0.9f)
-                )
-            }
         }
     }
 }
