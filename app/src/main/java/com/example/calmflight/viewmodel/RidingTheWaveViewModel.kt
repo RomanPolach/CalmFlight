@@ -1,30 +1,29 @@
 package com.example.calmflight.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.calmflight.R
 import com.example.calmflight.utils.TtsManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class RidingTheWaveViewModel(
     private val ttsManager: TtsManager
 ) : ViewModel() {
 
     private val steps = listOf(
-        R.string.rtw_intro,
-        R.string.rtw_step_1,
-        R.string.rtw_step_2,
-        R.string.rtw_step_3,
-        R.string.rtw_step_4,
-        R.string.rtw_step_5,
-        R.string.rtw_step_6,
-        R.string.rtw_step_7,
-        R.string.rtw_step_8,
-        R.string.rtw_step_9,
-        R.string.rtw_step_10
+        R.string.rtw2_intro,
+        R.string.rtw2_step_1,
+        R.string.rtw2_step_2,
+        R.string.rtw2_step_3,
+        R.string.rtw2_step_4,
+        R.string.rtw2_step_5,
+        R.string.rtw2_step_6,
+        R.string.rtw2_step_7,
+        R.string.rtw2_step_8,
+        R.string.rtw2_step_9,
+        R.string.rtw2_step_10,
+        R.string.rtw2_step_11
     )
 
     private val _currentStepIndex = MutableStateFlow(0)

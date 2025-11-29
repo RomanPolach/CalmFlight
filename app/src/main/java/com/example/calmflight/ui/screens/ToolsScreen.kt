@@ -2,25 +2,33 @@ package com.example.calmflight.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.Headphones
-import androidx.compose.material.icons.filled.MonitorHeart
-import androidx.compose.material.icons.filled.QuestionMark
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Waves
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.MonitorHeart
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Waves
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,12 +42,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.calmflight.R
 import com.example.calmflight.model.Tool
-import com.example.calmflight.ui.components.ScreenTitle
 import com.example.calmflight.ui.components.StandardTopBar
 import com.example.calmflight.ui.theme.BeigeWarm
 import com.example.calmflight.ui.theme.NavyDeep
@@ -116,6 +122,7 @@ fun ToolCard(tool: Tool, onClick: () -> Unit) {
                         "Shield" -> Icons.Default.Shield
                         "Meditation" -> Icons.Default.SelfImprovement
                         "Heart" -> Icons.Default.Favorite
+                        "Brain" -> Icons.Default.Psychology
                         else -> Icons.Default.QuestionMark
                     }, 
                     contentDescription = null,

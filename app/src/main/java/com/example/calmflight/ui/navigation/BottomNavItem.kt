@@ -4,8 +4,8 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.School
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.calmflight.R
 
@@ -25,6 +25,7 @@ sealed class Screen(val route: String) {
     object RealityCheck : Screen("reality_check")
     object SafetyFacts : Screen("safety_facts")
     object AcceptanceMeditation : Screen("acceptance_meditation")
+    object CatastrophicThinking : Screen("catastrophic_thinking")
     object LearnDetail : Screen("learn_detail/{itemId}") {
         fun createRoute(itemId: String) = "learn_detail/$itemId"
     }

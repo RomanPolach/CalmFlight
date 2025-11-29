@@ -1,14 +1,13 @@
 package com.example.calmflight.ui.navigation
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.calmflight.R
-import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.calmflight.R
 import com.example.calmflight.data.AppContent
 import com.example.calmflight.ui.screens.CockpitScreen
 import com.example.calmflight.ui.screens.GForceScreen
@@ -36,6 +35,7 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                         "6" -> navController.navigate(Screen.PostponeTheWorry.route)
                         "7" -> navController.navigate(Screen.WorryOlympics.route)
                         "8" -> navController.navigate(Screen.FacingTheFear.route)
+                        "13" -> navController.navigate(Screen.CatastrophicThinking.route)
                     }
                 },
                 onNavigateToLearn = { itemId ->
@@ -105,6 +105,7 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                         "10" -> navController.navigate(Screen.SafetyFacts.route)
                         "11" -> navController.navigate(Screen.AcceptanceMeditation.route)
                         "12" -> navController.navigate(Screen.SelfCompassion.route)
+                        "13" -> navController.navigate(Screen.CatastrophicThinking.route)
                     }
                 }
             )
@@ -143,15 +144,20 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
         }
         composable(Screen.WorryOlympics.route) {
             val steps = listOf(
-                R.string.wo_intro,
-                R.string.wo_step_1,
-                R.string.wo_step_2,
-                R.string.wo_step_3,
-                R.string.wo_step_4,
-                R.string.wo_step_5
+                R.string.wo2_intro,
+                R.string.wo2_step_1,
+                R.string.wo2_step_2,
+                R.string.wo2_step_3,
+                R.string.wo2_step_4,
+                R.string.wo2_step_5,
+                R.string.wo2_step_6,
+                R.string.wo2_step_7,
+                R.string.wo2_step_8,
+                R.string.wo2_step_9,
+                R.string.wo2_step_10
             )
             GuidedInterventionScreen(
-                titleRes = R.string.wo_title,
+                titleRes = R.string.wo2_title,
                 steps = steps,
                 onFinish = {
                     navController.popBackStack()
@@ -160,15 +166,16 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
         }
         composable(Screen.FacingTheFear.route) {
             val steps = listOf(
-                R.string.ftf_intro,
-                R.string.ftf_step_1,
-                R.string.ftf_step_2,
-                R.string.ftf_step_3,
-                R.string.ftf_step_4,
-                R.string.ftf_step_5,
-                R.string.ftf_step_6,
-                R.string.ftf_step_7,
-                R.string.ftf_step_8
+                R.string.cloud_meditation_part_1,
+                R.string.cloud_meditation_part_2,
+                R.string.cloud_meditation_part_3,
+                R.string.cloud_meditation_part_4,
+                R.string.cloud_meditation_part_5,
+                R.string.cloud_meditation_part_6,
+                R.string.cloud_meditation_part_7,
+                R.string.cloud_meditation_part_8,
+                R.string.cloud_meditation_part_9,
+                R.string.cloud_meditation_footer
             )
             GuidedInterventionScreen(
                 titleRes = R.string.ftf_title,
@@ -195,12 +202,12 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
         composable(Screen.AcceptanceMeditation.route) {
             val steps = listOf(
                 R.string.am_intro,
-                R.string.am_step_1,
-                R.string.am_step_2,
-                R.string.am_step_3,
-                R.string.am_step_4,
-                R.string.am_step_5,
-                R.string.am_step_6
+                R.string.am_part_1,
+                R.string.am_part_2,
+                R.string.am_part_3,
+                R.string.am_part_4,
+                R.string.am_part_5,
+                R.string.am_part_6
             )
             GuidedInterventionScreen(
                 titleRes = R.string.am_title,
@@ -223,6 +230,24 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
             )
             GuidedInterventionScreen(
                 titleRes = R.string.sca_title,
+                steps = steps,
+                onFinish = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(Screen.CatastrophicThinking.route) {
+            val steps = listOf(
+                R.string.ct_investigation_part_1,
+                R.string.ct_investigation_part_2,
+                R.string.ct_investigation_part_3,
+                R.string.ct_investigation_part_4,
+                R.string.ct_investigation_part_5,
+                R.string.ct_investigation_part_6,
+                R.string.ct_investigation_part_7
+            )
+            GuidedInterventionScreen(
+                titleRes = R.string.ct_title,
                 steps = steps,
                 onFinish = {
                     navController.popBackStack()
