@@ -24,6 +24,8 @@ class TtsManager(context: Context) {
                     // Handle error - for now we assume US English is available or fallback
                 } else {
                     isInitialized = true
+                    // Set a slightly slower, calmer default rate
+                    tts?.setSpeechRate(0.7f)
                 }
             }
         }
@@ -57,6 +59,22 @@ class TtsManager(context: Context) {
     fun stop() {
         tts?.stop()
         _isSpeaking.value = false
+    }
+
+    fun setSpeechRate(rate: Float) {
+        tts?.setSpeechRate(rate)
+    }
+
+    fun setPitch(pitch: Float) {
+        tts?.setPitch(pitch)
+    }
+
+    fun getVoices(): List<android.speech.tts.Voice> {
+        return tts?.voices?.toList() ?: emptyList()
+    }
+
+    fun setVoice(voice: android.speech.tts.Voice) {
+        tts?.voice = voice
     }
 
     fun shutdown() {

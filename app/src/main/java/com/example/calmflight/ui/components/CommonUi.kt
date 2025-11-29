@@ -1,5 +1,6 @@
 package com.example.calmflight.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,16 +8,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.HtmlCompat
 import com.example.calmflight.R
 import com.example.calmflight.ui.theme.BeigeWarm
 import com.example.calmflight.ui.theme.NavyDeep
@@ -95,6 +103,39 @@ fun ScreenTitle(
     )
 }
 
+/**
+ * Converts HTML string to AnnotatedString for Compose Text
+ * Handles basic HTML tags like <b>, <i>, <br>, etc.
+ */
+@Composable
+fun htmlToAnnotatedString(html: String): AnnotatedString {
+    return remember(html) {
+        val spanned = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT)
+        buildAnnotatedString {
+            append(spanned.toString())
+            
+            // Apply bold styling
+            spanned.getSpans(0, spanned.length, android.text.style.StyleSpan::class.java).forEach { span ->
+                val start = spanned.getSpanStart(span)
+                val end = spanned.getSpanEnd(span)
+                if (span.style == android.graphics.Typeface.BOLD) {
+                    addStyle(
+                        style = SpanStyle(fontWeight = FontWeight.Bold),
+                        start = start,
+                        end = end
+                    )
+                } else if (span.style == android.graphics.Typeface.ITALIC) {
+                    addStyle(
+                        style = SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
+                        start = start,
+                        end = end
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun ContentCard(
     text: String,
@@ -107,15 +148,33 @@ fun ContentCard(
             .background(NavyLight.copy(alpha = 0.5f))
             .padding(24.dp)
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontSize = 20.sp,
-                lineHeight = 30.sp
-            ),
-            color = BeigeWarm,
-            textAlign = TextAlign.Start
-        )
+        // Check if text contains HTML tags
+        val containsHtml = text.contains("<b>") || text.contains("<i>") || 
+                          text.contains("<br>") || text.contains("</")
+        
+        if (containsHtml) {
+            // Render as HTML
+            Text(
+                text = htmlToAnnotatedString(text),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 20.sp,
+                    lineHeight = 30.sp
+                ),
+                color = BeigeWarm,
+                textAlign = TextAlign.Start
+            )
+        } else {
+            // Render as plain text
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 20.sp,
+                    lineHeight = 30.sp
+                ),
+                color = BeigeWarm,
+                textAlign = TextAlign.Start
+            )
+        }
     }
 }
 
@@ -226,4 +285,68 @@ fun AnxietyRatingBar(
             )
         }
     }
+}
+
+@Composable
+fun ImageWithTitle(
+    imageRes: Int,
+    title: String,
+    modifier: Modifier = Modifier,
+    titleColor: Color = BeigeWarm,
+    containerColor: Color = NavyLight
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Image with 16:9 aspect ratio
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            ) {
+                Image(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            
+            // Title text
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = titleColor,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun ImageWithTitle(
+    imageRes: Int,
+    titleRes: Int,
+    modifier: Modifier = Modifier,
+    titleColor: Color = BeigeWarm,
+    containerColor: Color = NavyLight
+) {
+    ImageWithTitle(
+        imageRes = imageRes,
+        title = stringResource(titleRes),
+        modifier = modifier,
+        titleColor = titleColor,
+        containerColor = containerColor
+    )
 }

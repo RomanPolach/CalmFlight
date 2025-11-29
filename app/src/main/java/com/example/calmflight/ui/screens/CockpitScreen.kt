@@ -194,7 +194,7 @@ fun TakeoffContent(
     onNavigateToLearn: (String) -> Unit
 ) {
     // G-Force Monitor
-    GForceMonitorCard()
+    GForceMonitorCard(isCompact = true, onClick = { onNavigateToTool("3") })
     
     Text(
         text = stringResource(R.string.takeoff_tools_title),
@@ -224,11 +224,9 @@ fun CruiseContent(
     onNavigateToTool: (String) -> Unit,
     onNavigateToLearn: (String) -> Unit
 ) {
-    // Systems Normal Card
-    SystemsStatusCard()
     
     // G-Force Monitor (Always good to have)
-    GForceMonitorCard()
+    GForceMonitorCard(isCompact = true, onClick = { onNavigateToTool("3") })
     
     Text(
         text = stringResource(R.string.cruise_tools_title),
@@ -259,7 +257,7 @@ fun LandingContent(
     onNavigateToLearn: (String) -> Unit
 ) {
     // G-Force Monitor
-    GForceMonitorCard()
+    GForceMonitorCard(isCompact = true, onClick = { onNavigateToTool("3") })
     
     Text(
         text = stringResource(R.string.landing_tools_title),

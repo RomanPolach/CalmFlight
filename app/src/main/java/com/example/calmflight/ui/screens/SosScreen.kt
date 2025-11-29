@@ -31,7 +31,7 @@ import com.example.calmflight.ui.theme.TealSoft
 @Composable
 fun SosScreen(
     onNavigateToPanic: () -> Unit,
-    onNavigateToTurbulence: () -> Unit,
+    onNavigateToHelpOptions: () -> Unit,
     onExitSos: () -> Unit
 ) {
     // Subtle background pulse animation
@@ -114,12 +114,12 @@ fun SosScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Option 2: Turbulence/Fear (External)
+            // Option 2: Help Options
             SosOptionCard(
-                title = stringResource(R.string.sos_turbulence_title),
-                subtitle = stringResource(R.string.sos_turbulence_subtitle),
+                title = stringResource(R.string.sos_help_options_title),
+                subtitle = stringResource(R.string.sos_help_options_subtitle),
                 color = OrangeSafe,
-                onClick = onNavigateToTurbulence
+                onClick = onNavigateToHelpOptions
             )
             
             Spacer(modifier = Modifier.weight(1f))

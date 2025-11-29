@@ -38,6 +38,7 @@ fun GuidedInterventionScreen(
     }
 
     val currentTextRes by viewModel.currentTextRes.collectAsState()
+    val currentStepIndex by viewModel.currentStepIndex.collectAsState()
     val isLastStep by viewModel.isLastStep.collectAsState()
     val anxietyScore by viewModel.anxietyScore.collectAsState()
     val feedbackRes by viewModel.feedbackMessageRes.collectAsState()
@@ -49,6 +50,11 @@ fun GuidedInterventionScreen(
     if (currentTextRes == 0) return
 
     val currentText = stringResource(currentTextRes)
+    
+    // Auto-scroll to top when step changes
+    LaunchedEffect(currentStepIndex) {
+        scrollState.animateScrollTo(0)
+    }
 
     if (showSuccessDialog) {
         AlertDialog(
@@ -126,16 +132,17 @@ fun GuidedInterventionScreen(
                     onClick = { viewModel.nextStep(nextStepText) },
                     modifier = Modifier.fillMaxWidth(0.6f)
                 )
+            } else {
+                // Finish button on last step
+                PrimaryButton(
+                    text = stringResource(R.string.finish_btn),
+                    onClick = onFinish,
+                    modifier = Modifier.fillMaxWidth(0.6f)
+                )
             }
+            
+            Spacer(modifier = Modifier.height(20.dp))
         }
-
-        AnxietyRatingBar(
-            rating = anxietyScore,
-            onRatingChanged = { viewModel.updateAnxietyScore(it) },
-            onSubmitRating = { viewModel.submitRating() },
-            onFinish = { viewModel.finishSession(onFinish) },
-            feedbackMessageRes = feedbackRes
-        )
         }
     }
 }

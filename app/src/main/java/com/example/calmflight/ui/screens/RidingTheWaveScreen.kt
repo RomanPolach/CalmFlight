@@ -36,6 +36,7 @@ fun RidingTheWaveScreen(
     val feedbackRes by viewModel.feedbackMessageRes.collectAsState()
     val showSuccessDialog by viewModel.showSuccessDialog.collectAsState()
     val isSpeaking by viewModel.isSpeaking.collectAsState()
+    val currentStepIndex by viewModel.currentStepIndex.collectAsState()
     val scrollState = rememberScrollState()
 
     // Helper to get current text string for TTS
@@ -44,6 +45,11 @@ fun RidingTheWaveScreen(
     // Auto-play logic: When text changes, notify ViewModel to potentially speak it
     LaunchedEffect(currentText) {
         viewModel.onStepContentChanged(currentText)
+    }
+    
+    // Auto-scroll to top when step changes
+    LaunchedEffect(currentStepIndex) {
+        scrollState.animateScrollTo(0)
     }
 
     if (showSuccessDialog) {

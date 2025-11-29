@@ -68,14 +68,28 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                 onNavigateToPanic = {
                     navController.navigate(Screen.RidingTheWave.route)
                 },
-                onNavigateToTurbulence = {
-                    navController.navigate(Screen.GForceMonitorStandalone.route)
+                onNavigateToHelpOptions = {
+                    navController.navigate(Screen.HelpOptions.route)
                 },
                 onExitSos = {
                     navController.navigate(BottomNavItem.Cockpit.route) {
                         popUpTo(BottomNavItem.Cockpit.route) { inclusive = true }
                     }
                 }
+            )
+        }
+        composable(Screen.HelpOptions.route) {
+            com.example.calmflight.ui.screens.HelpOptionsScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToGForce = { navController.navigate(Screen.GForceMonitorStandalone.route) },
+                onNavigateToRidingTheWave = { navController.navigate(Screen.RidingTheWave.route) },
+                onNavigateToPostponeTheWorry = { navController.navigate(Screen.PostponeTheWorry.route) },
+                onNavigateToWorryOlympics = { navController.navigate(Screen.WorryOlympics.route) },
+                onNavigateToFacingTheFear = { navController.navigate(Screen.FacingTheFear.route) },
+                onNavigateToRealityCheck = { navController.navigate(Screen.RealityCheck.route) },
+                onNavigateToSafetyFacts = { navController.navigate(Screen.SafetyFacts.route) },
+                onNavigateToAcceptanceMeditation = { navController.navigate(Screen.AcceptanceMeditation.route) },
+                onNavigateToSelfCompassion = { navController.navigate(Screen.SelfCompassion.route) }
             )
         }
         composable(BottomNavItem.Tools.route) {
@@ -90,6 +104,7 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                         "9" -> navController.navigate(Screen.RealityCheck.route)
                         "10" -> navController.navigate(Screen.SafetyFacts.route)
                         "11" -> navController.navigate(Screen.AcceptanceMeditation.route)
+                        "12" -> navController.navigate(Screen.SelfCompassion.route)
                     }
                 }
             )
@@ -189,6 +204,25 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
             )
             GuidedInterventionScreen(
                 titleRes = R.string.am_title,
+                steps = steps,
+                onFinish = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(Screen.SelfCompassion.route) {
+            val steps = listOf(
+                R.string.sca_intro,
+                R.string.sca_step_1,
+                R.string.sca_step_2,
+                R.string.sca_step_3,
+                R.string.sca_step_4,
+                R.string.sca_step_5,
+                R.string.sca_step_6,
+                R.string.sca_step_7
+            )
+            GuidedInterventionScreen(
+                titleRes = R.string.sca_title,
                 steps = steps,
                 onFinish = {
                     navController.popBackStack()

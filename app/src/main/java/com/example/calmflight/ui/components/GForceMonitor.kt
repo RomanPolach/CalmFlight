@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -35,7 +36,9 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun GForceMonitorCard(
-    showExplanation: Boolean = false
+    showExplanation: Boolean = false,
+    isCompact: Boolean = false,
+    onClick: (() -> Unit)? = null
 ) {
     val gForce = rememberGForceSensor()
     // Keep history of last 300 points for the graph (approx 6 seconds at 50Hz)
@@ -130,74 +133,78 @@ fun GForceMonitorCard(
 
     Card(
         colors = CardDefaults.cardColors(containerColor = NavyLight),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = onClick != null) { onClick?.invoke() }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.g_force_monitor),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = BeigeWarm.copy(alpha = 0.7f)
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
+            if (!isCompact) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = stringResource(R.string.gforce_current_label) + ": ",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = BeigeWarm.copy(alpha = 0.6f)
+                        text = stringResource(R.string.g_force_monitor),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = BeigeWarm.copy(alpha = 0.7f)
                     )
-                    Text(
-                        text = String.format("%.2f G", displayedGForce.floatValue),
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = TealSoft,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(R.string.gforce_current_label) + ": ",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = BeigeWarm.copy(alpha = 0.6f)
+                        )
+                        Text(
+                            text = String.format("%.2f G", displayedGForce.floatValue),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = TealSoft,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
+                
+                // Min/Max readings row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(R.string.gforce_min_label) + ": ",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = BeigeWarm.copy(alpha = 0.5f)
+                        )
+                        Text(
+                            text = String.format("%.2f G", minReading.floatValue),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TealSoft.copy(alpha = 0.8f),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(R.string.gforce_max_label) + ": ",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = BeigeWarm.copy(alpha = 0.5f)
+                        )
+                        Text(
+                            text = String.format("%.2f G", maxReading.floatValue),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TealSoft.copy(alpha = 0.8f),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(12.dp))
             }
-            
-            // Min/Max readings row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(R.string.gforce_min_label) + ": ",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = BeigeWarm.copy(alpha = 0.5f)
-                    )
-                    Text(
-                        text = String.format("%.2f G", minReading.floatValue),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TealSoft.copy(alpha = 0.8f),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(R.string.gforce_max_label) + ": ",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = BeigeWarm.copy(alpha = 0.5f)
-                    )
-                    Text(
-                        text = String.format("%.2f G", maxReading.floatValue),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TealSoft.copy(alpha = 0.8f),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
 
             Box(
                 modifier = Modifier
-                    .height(300.dp)
+                    .height(if (isCompact) 150.dp else 300.dp)
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.Black.copy(alpha = 0.3f))

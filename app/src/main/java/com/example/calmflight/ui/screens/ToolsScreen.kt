@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Waves
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -114,6 +115,7 @@ fun ToolCard(tool: Tool, onClick: () -> Unit) {
                         "Chart" -> Icons.Default.DateRange
                         "Shield" -> Icons.Default.Shield
                         "Meditation" -> Icons.Default.SelfImprovement
+                        "Heart" -> Icons.Default.Favorite
                         else -> Icons.Default.QuestionMark
                     }, 
                     contentDescription = null,

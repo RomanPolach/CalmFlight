@@ -1,5 +1,6 @@
 package com.example.calmflight.model
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.calmflight.R
@@ -13,7 +14,9 @@ data class LearnSection(
 data class LearnItem(
     val id: String,
     @StringRes val questionRes: Int,
-    @StringRes val answerRes: Int
+    @StringRes val answerRes: Int,
+    @DrawableRes val imageRes: Int? = null,
+    @StringRes val imageTitleRes: Int? = null
 )
 
 data class Question(
