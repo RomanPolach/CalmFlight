@@ -15,7 +15,9 @@ data class CurrentWeather(
 
 data class CockpitUiState(
     val status: FlightStatus = FlightStatus.BOARDING,
-    val weather: WeatherUiState? = null
+    val weather: WeatherUiState? = null,
+    val isMetric: Boolean = false,
+    val showSettingsDialog: Boolean = false
 )
 
 data class WeatherUiState(
@@ -24,6 +26,8 @@ data class WeatherUiState(
     val temperature: Double = 0.0,
     val windSpeed: Double = 0.0,
     val weatherCode: Int = 0,
+    val weatherDescription: String = "",
+    val passengerMessage: String = "",  // Reassuring message for nervous flyers
     val isGoodForTakeoff: Boolean = true,
     @StringRes val messageRes: Int = 0,
     val messageArgs: List<Any> = emptyList(),

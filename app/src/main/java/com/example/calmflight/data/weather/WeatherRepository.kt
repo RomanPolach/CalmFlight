@@ -30,7 +30,10 @@ class WeatherRepository(
             }
             
             val isCalmWeather = current.weatherCode <= 3
-            val isLowWind = current.windSpeed < 25.0 
+            val isLowWind = current.windSpeed < 25.0
+
+            // Parse weather code for detailed information
+            val weatherInfo = WeatherCodeParser.getWeatherInfo(current.weatherCode)
             
             val isGoodForTakeoff = isCalmWeather && isLowWind
             
@@ -49,6 +52,8 @@ class WeatherRepository(
                 temperature = current.temperature,
                 windSpeed = current.windSpeed,
                 weatherCode = current.weatherCode,
+                weatherDescription = weatherInfo.description,
+                passengerMessage = weatherInfo.passengerMessage,
                 isGoodForTakeoff = isGoodForTakeoff,
                 messageRes = msgRes,
                 messageArgs = msgArgs,

@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.calmflight.R
 import com.example.calmflight.data.AppContent
+import com.example.calmflight.data.preferences.PreferencesManager
 import com.example.calmflight.model.FlightStatus
 import com.example.calmflight.ui.components.GForceMonitorCard
 import com.example.calmflight.ui.components.StandardTopBar
@@ -68,6 +69,9 @@ fun CockpitScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isFlightActive by viewModel.isFlightActive.collectAsState()
+
+    // Inject preferences manager for the dialog
+    val preferencesManager: PreferencesManager = org.koin.compose.koinInject()
     
     val phases = remember {
         listOf(
@@ -94,13 +98,21 @@ fun CockpitScreen(
         viewModel.setStatus(phases[pagerState.currentPage])
     }
 
+    // Show settings dialog
+    if (uiState.showSettingsDialog) {
+        com.example.calmflight.ui.components.SettingsDialog(
+            preferencesManager = preferencesManager,
+            onDismiss = { viewModel.toggleSettingsDialog(false) }
+        )
+    }
+
     Scaffold(
         topBar = {
             StandardTopBar(
                 title = stringResource(R.string.cockpit_title),
                 onBackClick = null,
                 actions = {
-                    IconButton(onClick = { /* Settings */ }) {
+                    IconButton(onClick = { viewModel.toggleSettingsDialog(true) }) {
                         Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings), tint = BeigeWarm)
                     }
                 }
@@ -161,7 +173,8 @@ fun CockpitScreen(
                         onNavigateToTool = onNavigateToTool,
                         weatherState = uiState.weather,
                         onFetchWeather = viewModel::fetchWeather,
-                        isFlightActive = isFlightActive
+                        isFlightActive = isFlightActive,
+                        isMetric = uiState.isMetric
                     )
                     FlightStatus.TAKEOFF -> TakeoffContent(
                         onNavigateToTool = onNavigateToTool,
@@ -190,12 +203,14 @@ fun BoardingContent(
     onNavigateToTool: (String) -> Unit,
     weatherState: com.example.calmflight.model.WeatherUiState?,
     onFetchWeather: (Double, Double) -> Unit,
-    isFlightActive: Boolean
+    isFlightActive: Boolean,
+    isMetric: Boolean
 ) {
     // 1. Weather Widget
     WeatherWidget(
         weatherState = weatherState,
-        onFetchWeather = onFetchWeather
+        onFetchWeather = onFetchWeather,
+        isMetric = isMetric
     )
     
     // 2. OnLandCard ("Ready to fly?")

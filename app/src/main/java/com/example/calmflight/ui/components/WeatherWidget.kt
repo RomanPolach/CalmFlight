@@ -7,19 +7,38 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,12 +51,14 @@ import com.example.calmflight.ui.theme.BeigeWarm
 import com.example.calmflight.ui.theme.NavyLight
 import com.example.calmflight.ui.theme.OrangeSafe
 import com.example.calmflight.ui.theme.TealSoft
+import com.example.calmflight.utils.UnitConverter
 import com.google.android.gms.location.LocationServices
 
 @Composable
 fun WeatherWidget(
     weatherState: WeatherUiState?,
-    onFetchWeather: (Double, Double) -> Unit
+    onFetchWeather: (Double, Double) -> Unit,
+    isMetric: Boolean
 ) {
     val context = LocalContext.current
     var hasLocationPermission by remember {
@@ -156,15 +177,29 @@ fun WeatherWidget(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${weatherState.temperature}°C",
+                        text = UnitConverter.formatTemperature(weatherState.temperature, isMetric),
                         style = MaterialTheme.typography.headlineMedium,
                         color = TealSoft,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
+                        // Weather description on same line as wind
+                        if (weatherState.weatherDescription.isNotEmpty()) {
+                            Text(
+                                text = weatherState.weatherDescription,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TealSoft,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                         Text(
-                            text = stringResource(R.string.weather_wind_fmt, weatherState.windSpeed),
+                            text = "Wind: ${
+                                UnitConverter.formatWindSpeed(
+                                    weatherState.windSpeed,
+                                    isMetric
+                                )
+                            }",
                             style = MaterialTheme.typography.bodyMedium,
                             color = BeigeWarm
                         )
@@ -172,24 +207,27 @@ fun WeatherWidget(
                 }
                 
                 Spacer(modifier = Modifier.height(12.dp))
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            if (weatherState.isGoodForTakeoff) 
-                                TealSoft.copy(alpha = 0.2f) 
-                            else 
-                                OrangeSafe.copy(alpha = 0.2f)
+
+                // Passenger Message (reassuring interpretation)
+                if (weatherState.passengerMessage.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (weatherState.isGoodForTakeoff)
+                                    TealSoft.copy(alpha = 0.2f)
+                                else
+                                    OrangeSafe.copy(alpha = 0.2f)
+                            )
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            text = weatherState.passengerMessage,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = BeigeWarm
                         )
-                        .padding(12.dp)
-                ) {
-                    Text(
-                        text = stringResource(weatherState.messageRes, *weatherState.messageArgs.toTypedArray()),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = BeigeWarm
-                    )
+                    }
                 }
             }
         }

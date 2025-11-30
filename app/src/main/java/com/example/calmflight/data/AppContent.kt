@@ -45,7 +45,6 @@ object AppContent {
                     R.drawable.deicing_a330,
                     R.string.img_title_deicing
                 ),
-                LearnItem("flight_9", R.string.flight_q9, R.string.flight_a9),
                 LearnItem(
                     "flight_10",
                     R.string.flight_q10,
