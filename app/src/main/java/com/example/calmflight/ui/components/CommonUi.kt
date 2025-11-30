@@ -132,13 +132,15 @@ fun htmlToAnnotatedString(html: String): AnnotatedString {
     return remember(html) {
         val spanned = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT)
         buildAnnotatedString {
-            append(spanned.toString())
+            // Use the CharSequence directly to preserve newlines
+            val text = spanned as CharSequence
+            append(text)
             
             // Apply bold styling
             spanned.getSpans(0, spanned.length, android.text.style.StyleSpan::class.java).forEach { span ->
                 val start = spanned.getSpanStart(span)
                 val end = spanned.getSpanEnd(span)
-                if (span.style == android.graphics.Typeface.BOLD) {
+                if ((span.style and android.graphics.Typeface.BOLD) != 0) {
                     addStyle(
                         style = SpanStyle(fontWeight = FontWeight.Bold, color = TealSoft),
                         start = start,
@@ -166,7 +168,7 @@ fun ContentCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(NavyLight.copy(alpha = 0.5f))
-            .padding(24.dp)
+            .padding(12.dp)
     ) {
         // Check if text contains HTML tags
         val containsHtml = text.contains("<b>") || text.contains("<i>") || 

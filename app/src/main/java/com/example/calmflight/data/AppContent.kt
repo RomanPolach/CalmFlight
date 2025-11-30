@@ -52,7 +52,8 @@ object AppContent {
                     R.string.flight_a10,
                     R.drawable.ram_air_turbine_a320,
                     R.string.img_title_rat
-                )
+                ),
+                LearnItem("flight_11", R.string.flight_q11, R.string.flight_a11)
             )
         ),
         LearnSection(
@@ -82,7 +83,6 @@ object AppContent {
                     R.drawable.crosswind_landing_a380,
                     R.string.img_title_crosswind_landing
                 ),
-                LearnItem("landing_8", R.string.landing_q8, R.string.landing_a8),
                 LearnItem("landing_9", R.string.landing_q9, R.string.landing_a9)
             )
         )

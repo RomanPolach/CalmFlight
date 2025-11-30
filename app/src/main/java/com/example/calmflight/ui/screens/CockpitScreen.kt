@@ -270,9 +270,7 @@ fun LandingContent(
     onNavigateToTool: (String) -> Unit,
     onNavigateToLearn: (String) -> Unit
 ) {
-    // G-Force Monitor
-    GForceMonitorCard(isCompact = true, onClick = { onNavigateToTool("3") })
-    
+
     Text(
         text = stringResource(R.string.landing_tools_title),
         style = MaterialTheme.typography.titleMedium,

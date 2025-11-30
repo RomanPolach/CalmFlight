@@ -60,7 +60,8 @@ fun LearnDetailScreen(
 
     Box(
         modifier = Modifier
-            .fillMaxSize().navigationBarsPadding()
+            .fillMaxSize()
+            .navigationBarsPadding()
             .background(NavyDeep)
     ) {
         // ==========================================================
@@ -126,7 +127,7 @@ fun LearnDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(NavyDeep) // Important: Covers image when scrolling up
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 12.dp)
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
                 ContentCard(text = item.answer())
