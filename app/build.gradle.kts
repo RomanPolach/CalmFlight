@@ -33,7 +33,7 @@ android {
     applicationVariants.all {
         outputs.all {
             (this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl)?.outputFileName =
-                "CalmFlight-${versionName}.apk"
+                "Peaceful Flight-${versionName}.apk"
         }
     }
     compileOptions {

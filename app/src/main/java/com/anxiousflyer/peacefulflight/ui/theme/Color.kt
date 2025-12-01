@@ -7,6 +7,8 @@ val NavyDeep = Color(0xFF0A192F)
 val NavyLight = Color(0xFF112240)
 val NavyLighter = Color(0xFF233554)
 
+val BlueLight = Color(0xFFD5E0F3)
+
 val TealSoft = Color(0xFF64FFDA)
 val TealDark = Color(0xFF14B8A6)
 

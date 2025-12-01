@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -71,7 +72,9 @@ fun RealityCheckScreen(
 
                 // Graph Section - Takes remaining space
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.7f),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
@@ -87,28 +90,34 @@ fun RealityCheckScreen(
                             .fillMaxWidth()
                             .weight(1f)
                     ) {
+
                         Box(modifier = Modifier
-                            .fillMaxSize()
+                            .weight(1f)
                             .padding(16.dp)) {
                             AnxietyGraph(flights = flights.takeLast(10))
                         }
-                    }
-                    
-                    // Legend
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        LegendItem(
-                            color = MaterialTheme.colorScheme.error,
-                            label = stringResource(R.string.rc_legend_expected)
-                        )
-                        Spacer(modifier = Modifier.width(24.dp))
-                        LegendItem(
-                            color = MaterialTheme.colorScheme.primary,
-                            label = stringResource(R.string.rc_legend_actual)
-                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+
+                        // Legend
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            LegendItem(
+                                color = MaterialTheme.colorScheme.error,
+                                label = stringResource(R.string.rc_legend_expected)
+                            )
+                            Spacer(modifier = Modifier.width(24.dp))
+                            LegendItem(
+                                color = MaterialTheme.colorScheme.primary,
+                                label = stringResource(R.string.rc_legend_actual)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,15 +58,15 @@ fun GForceMonitorCard(
     val gForce = rememberGForceSensor()
     // Keep history of last 300 points for the graph (approx 6 seconds at 50Hz)
     val history = remember { mutableStateListOf<Float>() }
-    
+
     // Track min/max readings while screen is open
     val minReading = remember { mutableFloatStateOf(1.0f) }
     val maxReading = remember { mutableFloatStateOf(1.0f) }
     var initialized = remember { mutableStateOf(false) }
-    
+
     // Displayed value - updated on a timer for stability
     val displayedGForce = remember { mutableFloatStateOf(1.0f) }
-    
+
     // Timer to update displayed value every 500ms
     LaunchedEffect(Unit) {
         while (true) {
@@ -73,20 +74,20 @@ fun GForceMonitorCard(
             if (history.isNotEmpty()) {
                 val recentCount = minOf(history.size, 10)
                 val recentHistory = history.takeLast(recentCount)
-                
+
                 // Find the most extreme value (furthest from 1.0G) in the recent history
                 val maxDeviation = recentHistory.maxByOrNull { kotlin.math.abs(it - 1.0f) } ?: 1.0f
-                
+
                 displayedGForce.floatValue = maxDeviation
             }
         }
     }
-    
+
     // Status stability - track recent statuses and pick the most common one
     val stableStatus = remember { mutableStateOf(GForceStatus.SMOOTH) }
     val recentStatuses = remember { mutableStateListOf<GForceStatus>() }
-    val maxRecentStatuses = 50 // About 2-3 seconds of readings
-    
+    val maxRecentStatuses = 150 // About 2-3 seconds of readings
+
     // Update history and min/max whenever gForce changes
     LaunchedEffect(gForce.value) {
         val currentG = gForce.value
@@ -95,7 +96,7 @@ fun GForceMonitorCard(
         if (history.size > 300) {
             history.removeAt(0)
         }
-        
+
         // Update min/max
         if (!initialized.value) {
             minReading.floatValue = currentG
@@ -109,7 +110,7 @@ fun GForceMonitorCard(
                 maxReading.floatValue = currentG
             }
         }
-        
+
         val deviation = kotlin.math.abs(currentG - 1.0f)
         val newStatus = when {
             deviation <= 0.03f -> GForceStatus.SMOOTH
@@ -117,24 +118,20 @@ fun GForceMonitorCard(
             deviation <= 0.13f -> GForceStatus.MODERATE
             else -> GForceStatus.BUMPY
         }
-        
+
         // Track recent statuses
         recentStatuses.add(newStatus)
         if (recentStatuses.size > maxRecentStatuses) {
             recentStatuses.removeAt(0)
         }
-        
-        if (recentStatuses.size >= 10) {
-            val bumpyCount = recentStatuses.count { it == GForceStatus.BUMPY }
-            val moderateCount = recentStatuses.count { it == GForceStatus.MODERATE }
-            val lightCount = recentStatuses.count { it == GForceStatus.LIGHT_BUMPS }
-            
-            stableStatus.value = when {
-                bumpyCount >= 4 -> GForceStatus.BUMPY 
-                moderateCount >= 6 -> GForceStatus.MODERATE
-                lightCount >= 10 -> GForceStatus.LIGHT_BUMPS 
-                else -> GForceStatus.SMOOTH
-            }
+
+        // Update status based on the worst condition in the recent history (peak hold)
+        // This ensures that if a bump happens, the status "Bumpy" stays visible for a few seconds
+        stableStatus.value = when {
+            recentStatuses.contains(GForceStatus.BUMPY) -> GForceStatus.BUMPY
+            recentStatuses.contains(GForceStatus.MODERATE) -> GForceStatus.MODERATE
+            recentStatuses.contains(GForceStatus.LIGHT_BUMPS) -> GForceStatus.LIGHT_BUMPS
+            else -> GForceStatus.SMOOTH
         }
     }
 
@@ -151,6 +148,8 @@ fun GForceMonitorCard(
             .fillMaxWidth()
             .clickable(enabled = onClick != null) { onClick?.invoke() }
     ) {
+        val graphBackground = MaterialTheme.colorScheme.onSecondaryContainer
+
         Column(modifier = Modifier.padding(16.dp)) {
             if (!isCompact) {
                 Row(
@@ -177,7 +176,7 @@ fun GForceMonitorCard(
                         )
                     }
                 }
-                
+
                 // Min/Max readings row
                 Row(
                     modifier = Modifier
@@ -212,7 +211,7 @@ fun GForceMonitorCard(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
@@ -227,7 +226,8 @@ fun GForceMonitorCard(
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val width = size.width
                     val height = size.height
-                    
+
+
                     // Map Y axis: 0.0G -> Height, 3.0G -> 0 (extend to show unsafe zone)
                     val mapY = { g: Float ->
                         val clamped = g.coerceIn(0f, 3.0f)
@@ -240,32 +240,38 @@ fun GForceMonitorCard(
                     drawRect(
                         color = Color(0xFFFF6B6B).copy(alpha = 0.15f), // Light red for unsafe zone
                         topLeft = Offset(0f, unsafeZoneTop),
-                        size = androidx.compose.ui.geometry.Size(width, unsafeZoneBottom - unsafeZoneTop)
+                        size = androidx.compose.ui.geometry.Size(
+                            width,
+                            unsafeZoneBottom - unsafeZoneTop
+                        )
                     )
-                    
+
                     // Draw SAFE ZONE (0 to 2.5G) - Green/Teal tint - WIDER and more visible
                     val safeZoneTop = mapY(2.5f)
                     val safeZoneBottom = mapY(0f)
                     drawRect(
-                        color = TealSoft.copy(alpha = 0.2f), // More visible safe zone
+                        color = graphBackground, // More visible safe zone
                         topLeft = Offset(0f, safeZoneTop),
-                        size = androidx.compose.ui.geometry.Size(width, safeZoneBottom - safeZoneTop)
+                        size = androidx.compose.ui.geometry.Size(
+                            width,
+                            safeZoneBottom - safeZoneTop
+                        )
                     )
-                    
+
                     // Draw "normal" zone highlight (0.8 to 1.2G) - Even more visible
                     drawRect(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                TealSoft.copy(alpha = 0.1f),
-                                TealSoft.copy(alpha = 0.3f),
-                                TealSoft.copy(alpha = 0.3f),
-                                TealSoft.copy(alpha = 0.1f)
+                                graphBackground.copy(alpha = 0.1f),
+                                graphBackground.copy(alpha = 0.3f),
+                                graphBackground.copy(alpha = 0.3f),
+                                graphBackground.copy(alpha = 0.1f)
                             ),
                             startY = mapY(1.2f),
                             endY = mapY(0.8f)
                         )
                     )
-                    
+
                     // Draw boundary line at 2.5G (start of unsafe zone) - CLEARLY VISIBLE
                     drawLine(
                         color = Color(0xFFFF6B6B).copy(alpha = 0.6f), // Red line for unsafe boundary
@@ -273,7 +279,7 @@ fun GForceMonitorCard(
                         end = Offset(width, mapY(2.5f)),
                         strokeWidth = 3.dp.toPx()
                     )
-                    
+
                     // Draw reference lines
                     // 1.0G center line - more visible
                     drawLine(
@@ -288,11 +294,11 @@ fun GForceMonitorCard(
                         val path = Path()
                         // Scale X to fit 300 points across the width
                         val stepX = width / 300f
-                        
+
                         history.forEachIndexed { index, g ->
                             val x = width - ((history.size - 1 - index) * stepX)
                             val y = mapY(g)
-                            
+
                             if (index == 0) {
                                 path.moveTo(x, y)
                             } else {
@@ -306,31 +312,40 @@ fun GForceMonitorCard(
                             style = Stroke(width = 3.dp.toPx())
                         )
                     }
+
+                    // Draw Labels directly on Canvas for correct positioning
+                    drawContext.canvas.nativeCanvas.apply {
+                        val textPaint = android.graphics.Paint().apply {
+                            color = android.graphics.Color.parseColor("#C71313")
+                            textSize = 30f // approx 10-11sp
+                            typeface = android.graphics.Typeface.DEFAULT_BOLD
+                            alpha = 200 // 0.8 alpha
+                        }
+
+                        if (!isCompact) {
+                            // 3.0G Label
+                            drawText(
+                                "3.0G",
+                                20f, // padding left
+                                mapY(3.0f) + 40f, // slightly below top edge
+                                textPaint
+                            )
+                        }
+
+                        // 2.5G Label - aligned with the 2.5G line
+                        textPaint.alpha = 150 // 0.6 alpha
+                        drawText(
+                            "2.5G",
+                            20f,
+                            mapY(2.5f) - 10f, // slightly above the line
+                            textPaint
+                        )
+                    }
+
                 }
-                
-                // Labels on graph
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = "3.0G",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFFFF6B6B).copy(alpha = 0.6f),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "2.5G",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFFFF6B6B).copy(alpha = 0.8f),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                
+
+
+
                 Text(
                     text = stringResource(R.string.safe_operating_zone),
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
@@ -340,7 +355,7 @@ fun GForceMonitorCard(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Status text - now stable and readable
             Text(
                 text = statusText,
@@ -349,9 +364,9 @@ fun GForceMonitorCard(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             // Safe range - BIGGER and BOLD
             Text(
                 text = stringResource(R.string.gforce_safe_range),
@@ -381,9 +396,9 @@ fun GForceExplanationCard() {
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             Text(
                 text = stringResource(R.string.gforce_explanation),
                 style = MaterialTheme.typography.bodyMedium,
@@ -404,13 +419,15 @@ private enum class GForceStatus {
 @Composable
 fun rememberGForceSensor(): State<Float> {
     val context = LocalContext.current
-    val sensorManager = remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
+    val sensorManager =
+        remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
     val accelerometer = remember { sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) }
     val gForce = remember { mutableFloatStateOf(1f) }
 
     DisposableEffect(Unit) {
         val listener = object : SensorEventListener {
             var smoothedValue = 9.81f
+
             // Alpha 0.05: "Goldilocks" smoothing.
             // 0.15 was too sensitive (picked up hand shakes).
             // 0.03 was too slow (missed real bumps).
@@ -422,25 +439,26 @@ fun rememberGForceSensor(): State<Float> {
                     val x = it.values[0]
                     val y = it.values[1]
                     val z = it.values[2]
-                    
+
                     // Calculate magnitude
-                    val currentRaw = sqrt((x*x + y*y + z*z).toDouble()).toFloat()
-                    
+                    val currentRaw = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+
                     // Apply Low-Pass Filter
                     smoothedValue = (currentRaw * alpha) + (smoothedValue * (1f - alpha))
-                    
+
                     // Convert to G-Force
                     gForce.floatValue = smoothedValue / 9.81f
                 }
             }
+
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
-        
+
         accelerometer?.also {
             // Use SENSOR_DELAY_GAME for faster updates (approx 50Hz)
             sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_GAME)
         }
-        
+
         onDispose {
             sensorManager.unregisterListener(listener)
         }

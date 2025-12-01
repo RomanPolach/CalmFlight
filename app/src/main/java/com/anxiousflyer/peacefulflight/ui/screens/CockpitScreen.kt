@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -124,7 +125,8 @@ fun CockpitScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .padding(start = 16.dp, end = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Phase Tabs
@@ -429,13 +431,20 @@ fun LearnQuestionsSection(
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
-                    section.items.forEach { item ->
+                    section.items.forEachIndexed { index, item ->
                         QuestionListItem(
                             question = stringResource(item.questionRes),
                             onClick = { onNavigateToLearn(item.id) }
                         )
+
+                        if (index < section.items.lastIndex) {
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                thickness = 1.dp
+                            )
+                        }
                     }
                 }
             }
@@ -458,7 +467,7 @@ fun QuestionListItem(
     ) {
         Text(
             text = question,
-            style = MaterialTheme.typography.bodyMedium,
+            fontStyle = MaterialTheme.typography.bodyLarge.fontStyle,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
