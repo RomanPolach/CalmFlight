@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.calmflight"
+    namespace = "com.anxiousflyer.peacefulflight"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.calmflight"
+        applicationId = "com.anxiousflyer.peacefulflight"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

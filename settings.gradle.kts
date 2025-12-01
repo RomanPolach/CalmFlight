@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CalmFlight"
+rootProject.name = "PeacefulFlight"
 include(":app")
  
