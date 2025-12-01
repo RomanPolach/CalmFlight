@@ -82,7 +82,13 @@ object AppContent {
                     R.drawable.crosswind_landing_a380,
                     R.string.img_title_crosswind_landing
                 ),
-                LearnItem("landing_9", R.string.landing_q9, R.string.landing_a9)
+                LearnItem(
+                    "landing_9",
+                    R.string.landing_q9,
+                    R.string.landing_a9,
+                    R.drawable.egpws_display,
+                    R.string.img_title_egpws
+                )
             )
         )
     )

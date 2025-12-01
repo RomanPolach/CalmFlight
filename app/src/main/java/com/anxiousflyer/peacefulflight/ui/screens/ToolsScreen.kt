@@ -72,17 +72,13 @@ fun ToolsScreen(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 50.dp, start = 16.dp, end = 16.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 88.dp, start = 16.dp, end = 16.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
             items(tools) { tool ->
                 ToolCard(tool, onClick = { onNavigateToTool(tool.id) })
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(50.dp))
             }
         }
     }

@@ -43,7 +43,7 @@ fun RealityCheckScreen(
     onBack: () -> Unit
 ) {
     val flights by viewModel.flightHistory.collectAsState()
-    val avgDiff = viewModel.getAverageDifference(flights)
+    val avgDiff = viewModel.getAverageDifference(flights.takeLast(10))
 
     Scaffold(
         topBar = {
@@ -90,7 +90,7 @@ fun RealityCheckScreen(
                         Box(modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp)) {
-                            AnxietyGraph(flights = flights)
+                            AnxietyGraph(flights = flights.takeLast(10))
                         }
                     }
                     

@@ -64,7 +64,7 @@ fun LearnScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(vertical = 8.dp)
+            contentPadding = PaddingValues(top = 8.dp, bottom = 88.dp)
         ) {
             items(sections) { section ->
                 SectionCard(
@@ -73,10 +73,6 @@ fun LearnScreen(
                     onToggle = { viewModel.toggleSection(section.id) },
                     onItemClick = onNavigateToDetail
                 )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(80.dp))
             }
         }
     }
