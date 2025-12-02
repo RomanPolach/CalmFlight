@@ -28,9 +28,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.anxiousflyer.peacefulflight.R
+import com.anxiousflyer.peacefulflight.ui.components.FlightEndedConfirmationDialog
 import com.anxiousflyer.peacefulflight.ui.components.FlightModeDialog
 import com.anxiousflyer.peacefulflight.ui.navigation.BottomNavItem
 import com.anxiousflyer.peacefulflight.ui.navigation.NavigationGraph
+import com.anxiousflyer.peacefulflight.ui.navigation.Screen
 import com.anxiousflyer.peacefulflight.viewmodel.MainViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -44,6 +46,7 @@ fun MainScreen(
     
     val isFlightActive by viewModel.isFlightActive.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
+    var showFlightEndedConfirmation by remember { mutableStateOf(false) }
     
     if (showDialog) {
         FlightModeDialog(
@@ -51,12 +54,23 @@ fun MainScreen(
             onConfirm = { rating ->
                 if (isFlightActive) {
                     viewModel.endFlight(rating)
+                    showFlightEndedConfirmation = true
                 } else {
                     viewModel.startFlight(rating)
                 }
                 showDialog = false
             },
             onDismiss = { showDialog = false }
+        )
+    }
+
+    if (showFlightEndedConfirmation) {
+        FlightEndedConfirmationDialog(
+            onGoToRealityCheck = {
+                showFlightEndedConfirmation = false
+                navController.navigate(Screen.RealityCheck.route)
+            },
+            onDismiss = { showFlightEndedConfirmation = false }
         )
     }
 

@@ -66,7 +66,7 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
         composable(BottomNavItem.Sos.route) {
             SosScreen(
                 onNavigateToPanic = {
-                    navController.navigate(Screen.RidingTheWave.route)
+                    navController.navigate(Screen.FacingTheFear.route)
                 },
                 onNavigateToHelpOptions = {
                     navController.navigate(Screen.HelpOptions.route)

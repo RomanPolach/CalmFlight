@@ -113,6 +113,6 @@ class RidingTheWaveViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        ttsManager.shutdown()
+        ttsManager.stop()
     }
 }

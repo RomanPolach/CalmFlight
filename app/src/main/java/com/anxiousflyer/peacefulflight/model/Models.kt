@@ -7,6 +7,7 @@ import com.anxiousflyer.peacefulflight.R
 data class LearnSection(
     val id: String,
     @StringRes val titleRes: Int,
+    @DrawableRes val imageRes: Int? = null,
     val items: List<LearnItem>
 )
 

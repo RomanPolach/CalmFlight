@@ -12,6 +12,7 @@ object AppContent {
         LearnSection(
             id = "takeoff",
             titleRes = R.string.learn_section_takeoff,
+            imageRes = R.drawable.img_takeoff,
             items = listOf(
                 LearnItem("takeoff_1", R.string.takeoff_q1, R.string.takeoff_a1),
                 LearnItem("takeoff_3", R.string.takeoff_q3, R.string.takeoff_a3),
@@ -30,6 +31,7 @@ object AppContent {
         LearnSection(
             id = "flight",
             titleRes = R.string.learn_section_flight,
+            imageRes = R.drawable.img_flight,
             items = listOf(
                 LearnItem("flight_1", R.string.flight_q1, R.string.flight_a1),
                 LearnItem("flight_2", R.string.flight_q2, R.string.flight_a2),
@@ -58,6 +60,7 @@ object AppContent {
         LearnSection(
             id = "landing",
             titleRes = R.string.learn_section_landing,
+            imageRes = R.drawable.img_landing,
             items = listOf(
                 LearnItem("landing_1", R.string.landing_q1, R.string.landing_a1),
                 LearnItem(
