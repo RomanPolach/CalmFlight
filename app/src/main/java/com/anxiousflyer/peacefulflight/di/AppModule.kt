@@ -15,6 +15,7 @@ import com.anxiousflyer.peacefulflight.viewmodel.RealityCheckViewModel
 import com.anxiousflyer.peacefulflight.viewmodel.RidingTheWaveViewModel
 import com.anxiousflyer.peacefulflight.viewmodel.SosViewModel
 import com.anxiousflyer.peacefulflight.viewmodel.ToolsViewModel
+import com.anxiousflyer.peacefulflight.viewmodel.VoicePreviewViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -45,9 +46,9 @@ val appModule = module {
     single { FlightRepository(get()) }
 
     // Utils
-    single { TtsManager(androidContext()) }
-    single { FlightModeManager(get()) }
     single { com.anxiousflyer.peacefulflight.data.preferences.PreferencesManager(androidContext()) }
+    single { TtsManager(androidContext(), get()) }
+    single { FlightModeManager(get()) }
 
     // ViewModels
     viewModel { MainViewModel(get(), get()) }
@@ -58,4 +59,5 @@ val appModule = module {
     viewModel { RidingTheWaveViewModel(get()) }
     viewModel { GuidedInterventionViewModel(get()) }
     viewModel { RealityCheckViewModel(get()) }
+    viewModel { VoicePreviewViewModel(get(), get()) }
 }

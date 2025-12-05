@@ -43,6 +43,10 @@ class CockpitViewModel(
         }
     }
 
+    fun refreshWeather() {
+        _uiState.update { it.copy(weather = null) }
+    }
+
     fun toggleSettingsDialog(show: Boolean) {
         _uiState.update { it.copy(showSettingsDialog = show) }
         if (!show) {

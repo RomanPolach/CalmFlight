@@ -1,8 +1,5 @@
 package com.anxiousflyer.peacefulflight.utils
 
-import android.util.Log
-import android.speech.tts.TextToSpeech
-
 /**
  * Extension functions for easy TTS voice logging
  */
@@ -24,7 +21,7 @@ fun TtsManager.logVoicesByLanguage() {
 }
 
 /**
- * Log only best offline voices
+ * Log only ubest offline voices
  */
 fun TtsManager.logBestOfflineVoices() {
     val logger = TtsVoiceLogger()

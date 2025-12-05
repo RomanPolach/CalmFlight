@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,6 +69,11 @@ fun CockpitScreen(
 
     // Inject preferences manager for the dialog
     val preferencesManager: PreferencesManager = org.koin.compose.koinInject()
+
+    // Refresh weather when screen becomes visible
+    LaunchedEffect(Unit) {
+        viewModel.refreshWeather()
+    }
     
     val phases = remember {
         listOf(
@@ -357,7 +361,7 @@ fun ToolShortcutCard(
 
 @Composable
 fun OnLandCard(isFlightActive: Boolean) {
-    ElevatedCard(
+    Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         modifier = Modifier
             .fillMaxWidth()

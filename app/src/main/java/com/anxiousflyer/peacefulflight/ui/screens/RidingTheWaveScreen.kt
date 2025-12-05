@@ -131,7 +131,7 @@ fun RidingTheWaveScreen(
                             )
                     ) {
                         Icon(
-                            imageVector = if (uiState.isSpeaking) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
+                            imageVector = if (uiState.isAutoPlayEnabled) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
                             contentDescription = "Read aloud",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(28.dp)

@@ -1,6 +1,5 @@
 package com.anxiousflyer.peacefulflight.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,7 +55,7 @@ fun GuidedInterventionScreen(
     val anxietyScore by viewModel.anxietyScore.collectAsState()
     val feedbackRes by viewModel.feedbackMessageRes.collectAsState()
     val showSuccessDialog by viewModel.showSuccessDialog.collectAsState()
-    val isSpeaking by viewModel.isSpeaking.collectAsState()
+    val isAutoPlayEnabled by viewModel.isAutoPlayEnabled.collectAsState()
     val scrollState = rememberScrollState()
     
     // Handle empty initial state safely
@@ -127,21 +127,22 @@ fun GuidedInterventionScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                IconButton(
-                    onClick = { viewModel.toggleTts(currentText) },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            MaterialTheme.colorScheme.surfaceContainer,
-                            shape = MaterialTheme.shapes.medium
-                        )
+                Surface(
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shadowElevation = 4.dp
                 ) {
-                    Icon(
-                        imageVector = if (isSpeaking) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
-                        contentDescription = "Read aloud",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    IconButton(
+                        onClick = { viewModel.toggleTts(currentText) },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isAutoPlayEnabled) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
+                            contentDescription = "Read aloud",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             }
 

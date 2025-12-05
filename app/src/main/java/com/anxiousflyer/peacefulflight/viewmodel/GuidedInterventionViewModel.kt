@@ -34,27 +34,30 @@ class GuidedInterventionViewModel(
 
     private val _showSuccessDialog = MutableStateFlow(false)
     val showSuccessDialog: StateFlow<Boolean> = _showSuccessDialog.asStateFlow()
-    
-    val isSpeaking: StateFlow<Boolean> = ttsManager.isSpeaking
-    private var shouldAutoPlay = false
+
+    private val _isAutoPlayEnabled = MutableStateFlow(false)
+    val isAutoPlayEnabled: StateFlow<Boolean> = _isAutoPlayEnabled.asStateFlow()
+
+    private var isInitialized = false
 
     fun initialize(stepResIds: List<Int>) {
-        if (stepResIds.isNotEmpty()) {
+        if (!isInitialized && stepResIds.isNotEmpty()) {
             _steps.value = stepResIds
             _currentStepIndex.value = 0
             _currentTextRes.value = stepResIds[0]
             _isLastStep.value = stepResIds.size == 1
-            shouldAutoPlay = false
+            _isAutoPlayEnabled.value = false
+            isInitialized = true
         }
     }
 
     fun toggleTts(text: String) {
-        if (isSpeaking.value) {
+        if (_isAutoPlayEnabled.value) {
             ttsManager.stop()
-            shouldAutoPlay = false
+            _isAutoPlayEnabled.value = false
         } else {
             ttsManager.speak(text)
-            shouldAutoPlay = true
+            _isAutoPlayEnabled.value = true
         }
     }
 
@@ -64,8 +67,8 @@ class GuidedInterventionViewModel(
             _currentStepIndex.value += 1
             _currentTextRes.value = _steps.value[_currentStepIndex.value]
             _isLastStep.value = _currentStepIndex.value == _steps.value.size - 1
-            
-            if (shouldAutoPlay) {
+
+            if (_isAutoPlayEnabled.value) {
                 ttsManager.speak(nextText)
             }
         }

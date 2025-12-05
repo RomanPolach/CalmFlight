@@ -4,18 +4,20 @@ import android.content.Context
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import com.anxiousflyer.peacefulflight.data.preferences.PreferencesManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
 
-class TtsManager(context: Context) {
+class TtsManager(context: Context, private val preferencesManager: PreferencesManager) {
 
     private var tts: TextToSpeech? = null
     private val _isSpeaking = MutableStateFlow(false)
     val isSpeaking: StateFlow<Boolean> = _isSpeaking.asStateFlow()
 
-    private var isInitialized = false
+    private val _isInitialized = MutableStateFlow(false)
+    val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()
 
     init {
         tts = TextToSpeech(context) { status ->
@@ -24,40 +26,69 @@ class TtsManager(context: Context) {
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     // Handle error - for now we assume US English is available or fallback
                 } else {
-                    isInitialized = true
-                    // Set a slightly slower, calmer default rate
-                    tts?.setSpeechRate(0.7f)
+                    _isInitialized.value = true
+
+                    // Restore saved preferences
+                    restoreSavedVoice()
+                    restoreSavedSpeechRate()
+
+                    // Set utterance listener after initialization
+                    tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                        override fun onStart(utteranceId: String?) {
+                            _isSpeaking.value = true
+                        }
+
+                        override fun onDone(utteranceId: String?) {
+                            _isSpeaking.value = false
+                        }
+
+                        override fun onError(utteranceId: String?) {
+                            _isSpeaking.value = false
+                        }
+                    })
 
                     // Log available voices for debugging
                     logAvailableVoices()
                 }
             }
         }
-        tts?.voices
+    }
 
-        tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onStart(utteranceId: String?) {
-                _isSpeaking.value = true
-            }
+    private fun restoreSavedVoice() {
+        val savedVoiceName = preferencesManager.getTtsVoiceName() ?: return
+        val voices = tts?.voices ?: return
+        val savedVoice = voices.find { it.name == savedVoiceName }
+        if (savedVoice != null) {
+            tts?.voice = savedVoice
+            Log.d("TtsManager", "Restored saved voice: $savedVoiceName")
+        }
+    }
 
-            override fun onDone(utteranceId: String?) {
-                _isSpeaking.value = false
-            }
-
-            override fun onError(utteranceId: String?) {
-                _isSpeaking.value = false
-            }
-        })
+    private fun restoreSavedSpeechRate() {
+        val savedRate = preferencesManager.getTtsSpeechRate()
+        tts?.setSpeechRate(savedRate)
+        Log.d("TtsManager", "Restored saved speech rate: $savedRate")
     }
 
     fun speak(text: String) {
-        if (isInitialized) {
+        if (_isInitialized.value) {
             // Stop whatever is currently playing
             stop()
-            // Queue the new text
+
+            // Split text by paragraphs and add pauses between them
+            val paragraphs = text.split("\n\n").filter { it.isNotBlank() }
             val params = android.os.Bundle()
-            // Request ID for the listener
-            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, params, "TTS_ID")
+
+            paragraphs.forEachIndexed { index, paragraph ->
+                // Speak the paragraph
+                val queueMode = if (index == 0) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD
+                tts?.speak(paragraph.trim(), queueMode, params, "TTS_ID_$index")
+
+                // Add 1 second pause after each paragraph (except the last one)
+                if (index < paragraphs.size - 1) {
+                    tts?.playSilentUtterance(1000L, TextToSpeech.QUEUE_ADD, "PAUSE_$index")
+                }
+            }
         }
     }
 

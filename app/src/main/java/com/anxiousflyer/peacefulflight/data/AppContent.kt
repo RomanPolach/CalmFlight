@@ -118,6 +118,7 @@ object AppContent {
         Tool(
             "13", "Catastrophic Thinking", "" +
                     "Investigate your worries", "Brain"
-        )
+        ),
+        Tool("14", "Voice Settings", "Preview TTS voices", "Voice")
     )
 }

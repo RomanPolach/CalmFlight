@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Waves
@@ -120,6 +121,7 @@ fun ToolCard(tool: Tool, onClick: () -> Unit) {
                         "Meditation" -> Icons.Default.SelfImprovement
                         "Heart" -> Icons.Default.Favorite
                         "Brain" -> Icons.Default.Psychology
+                        "Voice" -> Icons.Default.RecordVoiceOver
                         else -> Icons.Default.QuestionMark
                     }, 
                     contentDescription = null,

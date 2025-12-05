@@ -24,9 +24,9 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,8 +39,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,7 +75,7 @@ fun WeatherWidget(
                 permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
     }
 
-    LaunchedEffect(hasLocationPermission) {
+    LaunchedEffect(hasLocationPermission, weatherState) {
         if (hasLocationPermission && weatherState == null) {
             getCurrentLocation(context) { lat, lon ->
                 onFetchWeather(lat, lon)
@@ -81,7 +83,7 @@ fun WeatherWidget(
         }
     }
 
-    ElevatedCard(
+    Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = RoundedCornerShape(16.dp)
@@ -112,11 +114,14 @@ fun WeatherWidget(
                         )
                     }
                 }
-                Icon(
-                    imageVector = if (weatherState?.isGoodForTakeoff == true) Icons.Default.WbSunny else Icons.Default.Cloud,
-                    contentDescription = null,
-                    tint = if (weatherState?.isGoodForTakeoff == true) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                )
+                if (weatherState != null && !weatherState.isLoading && weatherState.errorRes == null) {
+                    Icon(
+                        modifier = Modifier.size(48.dp),
+                        imageVector = weatherState.getWeatherIcon(),
+                        contentDescription = null,
+                        tint = weatherState.getWeatherIconTint()
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -249,4 +254,22 @@ private fun getCurrentLocation(context: Context, onLocation: (Double, Double) ->
     } catch (e: Exception) {
         e.printStackTrace()
     }
+}
+
+@Composable
+private fun WeatherUiState?.getWeatherIcon(): ImageVector {
+    return when (this?.weatherCode) {
+        0, 1 -> Icons.Default.WbSunny
+        2 -> ImageVector.vectorResource(R.drawable.ic_partly_cloudy)
+        3, 45, 48, 95, 96, 99 -> Icons.Default.Cloud
+        51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82 -> ImageVector.vectorResource(R.drawable.ic_rain)
+        71, 73, 75, 77, 85, 86 -> ImageVector.vectorResource(R.drawable.ic_snow)
+        else -> Icons.Default.Cloud
+    }
+}
+
+@Composable
+private fun WeatherUiState?.getWeatherIconTint() = when (this?.weatherCode) {
+    0, 1 -> MaterialTheme.colorScheme.error
+    else -> MaterialTheme.colorScheme.primary
 }

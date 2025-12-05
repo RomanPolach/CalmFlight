@@ -15,7 +15,7 @@ data class RidingTheWaveUiState(
     val anxietyScore: Float = 5f,
     val feedbackMessageRes: Int? = null,
     val showSuccessDialog: Boolean = false,
-    val isSpeaking: Boolean = false
+    val isAutoPlayEnabled: Boolean = false
 )
 
 class RidingTheWaveViewModel(
@@ -41,30 +41,20 @@ class RidingTheWaveViewModel(
     val uiState: StateFlow<RidingTheWaveUiState> = _uiState.asStateFlow()
 
     private val anxietyHistory = mutableListOf<Int>()
-    private var shouldAutoPlay = false
-
-    init {
-        // Observe TTS speaking state and update UI state
-        ttsManager.isSpeaking.value.let { speaking ->
-            _uiState.update { it.copy(isSpeaking = speaking) }
-        }
-    }
 
     fun toggleTts(text: String) {
-        if (_uiState.value.isSpeaking) {
+        if (_uiState.value.isAutoPlayEnabled) {
             ttsManager.stop()
-            shouldAutoPlay = false
-            _uiState.update { it.copy(isSpeaking = false) }
+            _uiState.update { it.copy(isAutoPlayEnabled = false) }
         } else {
             ttsManager.speak(text)
-            shouldAutoPlay = true
-            _uiState.update { it.copy(isSpeaking = true) }
+            _uiState.update { it.copy(isAutoPlayEnabled = true) }
         }
     }
 
     // Called by UI when the step content changes (e.g. after nextStep)
     fun onStepContentChanged(text: String) {
-        if (shouldAutoPlay) {
+        if (_uiState.value.isAutoPlayEnabled) {
             ttsManager.speak(text)
         }
     }
@@ -78,8 +68,7 @@ class RidingTheWaveViewModel(
                 it.copy(
                     currentStepIndex = newIndex,
                     currentTextRes = steps[newIndex],
-                    isLastStep = newIndex == steps.size - 1,
-                    isSpeaking = false
+                    isLastStep = newIndex == steps.size - 1
                 )
             }
         }

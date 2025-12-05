@@ -17,6 +17,7 @@ import com.anxiousflyer.peacefulflight.ui.screens.LearnScreen
 import com.anxiousflyer.peacefulflight.ui.screens.RidingTheWaveScreen
 import com.anxiousflyer.peacefulflight.ui.screens.SosScreen
 import com.anxiousflyer.peacefulflight.ui.screens.ToolsScreen
+import com.anxiousflyer.peacefulflight.ui.screens.VoicePreviewScreen
 
 @Composable
 fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -106,6 +107,7 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                         "11" -> navController.navigate(Screen.AcceptanceMeditation.route)
                         "12" -> navController.navigate(Screen.SelfCompassion.route)
                         "13" -> navController.navigate(Screen.CatastrophicThinking.route)
+                        "14" -> navController.navigate(Screen.VoiceSettings.route)
                     }
                 }
             )
@@ -250,6 +252,13 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                 titleRes = R.string.ct_title,
                 steps = steps,
                 onFinish = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(Screen.VoiceSettings.route) {
+            VoicePreviewScreen(
+                onBack = {
                     navController.popBackStack()
                 }
             )

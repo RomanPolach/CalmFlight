@@ -73,6 +73,34 @@ class PreferencesManager(context: Context) {
      */
     fun isImperial(): Boolean = getUnitSystem() == UnitSystem.IMPERIAL
 
+    /**
+     * Get the saved TTS voice name
+     */
+    fun getTtsVoiceName(): String? {
+        return prefs.getString(KEY_TTS_VOICE, null)
+    }
+
+    /**
+     * Save the TTS voice name
+     */
+    fun setTtsVoiceName(voiceName: String) {
+        prefs.edit().putString(KEY_TTS_VOICE, voiceName).apply()
+    }
+
+    /**
+     * Get the saved TTS speech rate (default: 0.8)
+     */
+    fun getTtsSpeechRate(): Float {
+        return prefs.getFloat(KEY_TTS_SPEECH_RATE, DEFAULT_SPEECH_RATE)
+    }
+
+    /**
+     * Save the TTS speech rate
+     */
+    fun setTtsSpeechRate(rate: Float) {
+        prefs.edit().putFloat(KEY_TTS_SPEECH_RATE, rate).apply()
+    }
+
     private val _themeModeFlow = kotlinx.coroutines.flow.MutableStateFlow(getThemeMode())
     val themeModeFlow: kotlinx.coroutines.flow.StateFlow<ThemeMode> = _themeModeFlow.asStateFlow()
 
@@ -90,5 +118,8 @@ class PreferencesManager(context: Context) {
         private const val PREFS_NAME = "calm_flight_prefs"
         private const val KEY_UNIT_SYSTEM = "unit_system"
         private const val KEY_THEME_MODE = "theme_mode"
+        private const val KEY_TTS_VOICE = "tts_voice"
+        private const val KEY_TTS_SPEECH_RATE = "tts_speech_rate"
+        const val DEFAULT_SPEECH_RATE = 0.8f
     }
 }
