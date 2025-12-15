@@ -14,6 +14,12 @@ class MainViewModel(
     val themeMode = preferencesManager.themeModeFlow
     val isFlightActive: StateFlow<Boolean> = flightModeManager.isFlightActive
 
+    init {
+        viewModelScope.launch {
+            flightModeManager.restoreActiveFlightIfExists()
+        }
+    }
+
     fun startFlight(expectedFear: Int) {
         viewModelScope.launch {
             flightModeManager.startFlight(expectedFear)

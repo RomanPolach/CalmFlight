@@ -30,6 +30,11 @@ class FlightRepository(private val flightDao: FlightDao) {
     suspend fun getFlight(id: Long): FlightSession? {
         return flightDao.getFlightById(id)
     }
+
+    suspend fun getActiveFlightWithin24Hours(): FlightSession? {
+        val cutoffTime = System.currentTimeMillis() - (24 * 60 * 60 * 1000)
+        return flightDao.getUnfinishedFlightAfter(cutoffTime)
+    }
 }
 
 

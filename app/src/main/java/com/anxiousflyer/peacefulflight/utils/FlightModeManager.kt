@@ -25,6 +25,14 @@ class FlightModeManager(private val repository: FlightRepository) {
         currentFlightId = null
         _isFlightActive.value = false
     }
+
+    suspend fun restoreActiveFlightIfExists() {
+        val activeFlight = repository.getActiveFlightWithin24Hours()
+        if (activeFlight != null) {
+            currentFlightId = activeFlight.id
+            _isFlightActive.value = true
+        }
+    }
 }
 
 

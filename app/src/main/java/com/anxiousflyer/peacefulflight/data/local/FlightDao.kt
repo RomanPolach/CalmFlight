@@ -19,6 +19,9 @@ interface FlightDao {
 
     @Query("SELECT * FROM flight_sessions WHERE id = :id")
     suspend fun getFlightById(id: Long): FlightSession?
+
+    @Query("SELECT * FROM flight_sessions WHERE endTime IS NULL AND startTime > :cutoffTime ORDER BY startTime DESC LIMIT 1")
+    suspend fun getUnfinishedFlightAfter(cutoffTime: Long): FlightSession?
 }
 
 

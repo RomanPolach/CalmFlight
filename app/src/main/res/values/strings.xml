@@ -80,6 +80,17 @@
     <string name="gforce_min_label">Min</string>
     <string name="gforce_max_label">Max</string>
 
+    <!-- G-Force Overlay -->
+    <string name="gforce_overlay_channel_name">G-Force Monitor</string>
+    <string name="gforce_overlay_channel_desc">Shows floating G-Force monitor overlay</string>
+    <string name="gforce_overlay_notification_title">G-Force Monitor Active</string>
+    <string name="gforce_overlay_notification_text">Tap to open app, or use the floating widget</string>
+    <string name="gforce_overlay_stop">Stop</string>
+    <string name="gforce_overlay_start">Show Floating Monitor</string>
+    <string name="gforce_overlay_permission_title">Overlay Permission Required</string>
+    <string name="gforce_overlay_permission_desc">To show the floating G-Force monitor over other apps, please grant the \"Display over other apps\" permission.</string>
+    <string name="gforce_overlay_permission_btn">Grant Permission</string>
+
     <!-- Flight Status -->
     <string name="status_on_land">On Land</string>
     <string name="status_boarding">Boarding</string>
