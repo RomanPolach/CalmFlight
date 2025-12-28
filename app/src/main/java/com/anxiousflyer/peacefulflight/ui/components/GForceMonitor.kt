@@ -1,10 +1,5 @@
 package com.anxiousflyer.peacefulflight.ui.components
 
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -45,15 +41,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anxiousflyer.peacefulflight.R
+import com.anxiousflyer.peacefulflight.sensor.GForceSensorManager
 import com.anxiousflyer.peacefulflight.ui.theme.TealSoft
 import kotlinx.coroutines.delay
-import kotlin.math.sqrt
 
 @Composable
 fun GForceMonitorCard(
     showExplanation: Boolean = false,
     isCompact: Boolean = false,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onOverlayClick: (() -> Unit)? = null
 ) {
     val gForce = rememberGForceSensor()
     // Keep history of last 300 points for the graph (approx 6 seconds at 50Hz)
@@ -375,6 +372,17 @@ fun GForceMonitorCard(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
+
+            // Floating overlay button (only shown when callback provided)
+            if (onOverlayClick != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = onOverlayClick,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.gforce_overlay_start))
+                }
+            }
         }
     }
 }
@@ -419,49 +427,12 @@ private enum class GForceStatus {
 @Composable
 fun rememberGForceSensor(): State<Float> {
     val context = LocalContext.current
-    val sensorManager =
-        remember { context.getSystemService(Context.SENSOR_SERVICE) as SensorManager }
-    val accelerometer = remember { sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) }
     val gForce = remember { mutableFloatStateOf(1f) }
+    val sensorManager = remember { GForceSensorManager(context) }
 
     DisposableEffect(Unit) {
-        val listener = object : SensorEventListener {
-            var smoothedValue = 9.81f
-
-            // Alpha 0.05: "Goldilocks" smoothing.
-            // 0.15 was too sensitive (picked up hand shakes).
-            // 0.03 was too slow (missed real bumps).
-            // 0.05 filters out high-freq jitter but catches the "heave" of turbulence.
-            val alpha = 0.05f
-
-            override fun onSensorChanged(event: SensorEvent?) {
-                event?.let {
-                    val x = it.values[0]
-                    val y = it.values[1]
-                    val z = it.values[2]
-
-                    // Calculate magnitude
-                    val currentRaw = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
-
-                    // Apply Low-Pass Filter
-                    smoothedValue = (currentRaw * alpha) + (smoothedValue * (1f - alpha))
-
-                    // Convert to G-Force
-                    gForce.floatValue = smoothedValue / 9.81f
-                }
-            }
-
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-        }
-
-        accelerometer?.also {
-            // Use SENSOR_DELAY_GAME for faster updates (approx 50Hz)
-            sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_GAME)
-        }
-
-        onDispose {
-            sensorManager.unregisterListener(listener)
-        }
+        sensorManager.start { gForce.floatValue = it }
+        onDispose { sensorManager.stop() }
     }
     return gForce
 }

@@ -1,21 +1,58 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Project specific ProGuard rules
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep your data models and everything in the model package
+-keep class com.anxiousflyer.peacefulflight.model.** { *; }
+-keep @androidx.annotation.Keep class *
+-keepclassmembers class * {
+    @androidx.annotation.Keep *;
+}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Retrofit 2 rules
+-keepattributes Signature, InnerClasses, EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keepattributes RuntimeInvisibleAnnotations, RuntimeInvisibleParameterAnnotations
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepclasseswithmembers interface * {
+    @retrofit2.http.* <methods>;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep the weather service interface explicitly
+-keep interface com.anxiousflyer.peacefulflight.data.weather.WeatherService { *; }
+
+# Gson rules
+-keep class com.google.gson.** { *; }
+-keep class com.google.gson.reflect.TypeToken
+-keep class * extends com.google.gson.reflect.TypeToken
+-keepattributes Signature
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# OKHttp rules
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontwarn org.conscrypt.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+
+# Coroutines - CRITICAL for suspend functions in Retrofit
+-keepnames class kotlinx.coroutines.internal.MainDispatcherLoader {}
+-keepnames class kotlinx.coroutines.CoroutineScope {}
+-keepclassmembers class * extends kotlin.coroutines.jvm.internal.ContinuationImpl {
+    <fields>;
+}
+-keepclassmembers class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.coroutines.**
+
+# Koin rules
+-keep class org.koin.** { *; }
+-dontwarn org.koin.**
+
+# Room entities/DAOs
+-keep class com.anxiousflyer.peacefulflight.data.local.** { *; }
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.**
+
+# Keep generic info for reflection
+-keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod

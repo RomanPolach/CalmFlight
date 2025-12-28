@@ -51,11 +51,15 @@ import com.anxiousflyer.peacefulflight.R
 import com.anxiousflyer.peacefulflight.model.WeatherUiState
 import com.anxiousflyer.peacefulflight.utils.UnitConverter
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 
 @Composable
 fun WeatherWidget(
     weatherState: WeatherUiState?,
     onFetchWeather: (Double, Double) -> Unit,
+    onLocationError: (Int) -> Unit,
+    onRetry: () -> Unit,
     isMetric: Boolean
 ) {
     val context = LocalContext.current
@@ -77,9 +81,11 @@ fun WeatherWidget(
 
     LaunchedEffect(hasLocationPermission, weatherState) {
         if (hasLocationPermission && weatherState == null) {
-            getCurrentLocation(context) { lat, lon ->
-                onFetchWeather(lat, lon)
-            }
+            getCurrentLocation(
+                context = context,
+                onLocation = { lat, lon -> onFetchWeather(lat, lon) },
+                onError = { onLocationError(R.string.weather_error_location) }
+            )
         }
     }
 
@@ -171,7 +177,15 @@ fun WeatherWidget(
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = onRetry,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                        modifier = Modifier.height(36.dp)
+                    ) {
+                        Text(stringResource(R.string.weather_retry_btn))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.weather_offline_reassurance),
                         style = MaterialTheme.typography.bodySmall,
@@ -243,16 +257,40 @@ fun WeatherWidget(
 }
 
 @SuppressLint("MissingPermission")
-private fun getCurrentLocation(context: Context, onLocation: (Double, Double) -> Unit) {
+private fun getCurrentLocation(
+    context: Context,
+    onLocation: (Double, Double) -> Unit,
+    onError: () -> Unit
+) {
     try {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        
+        // Priority 1: Use last known location for speed
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 onLocation(location.latitude, location.longitude)
+            } else {
+                // Priority 2: Request fresh location if lastLocation is null
+                val cancellationTokenSource = CancellationTokenSource()
+                fusedLocationClient.getCurrentLocation(
+                    Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                    cancellationTokenSource.token
+                ).addOnSuccessListener { freshLocation ->
+                    if (freshLocation != null) {
+                        onLocation(freshLocation.latitude, freshLocation.longitude)
+                    } else {
+                        onError()
+                    }
+                }.addOnFailureListener {
+                    onError()
+                }
             }
+        }.addOnFailureListener {
+            onError()
         }
     } catch (e: Exception) {
         e.printStackTrace()
+        onError()
     }
 }
 

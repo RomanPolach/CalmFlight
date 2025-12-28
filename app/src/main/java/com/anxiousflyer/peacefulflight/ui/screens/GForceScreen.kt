@@ -7,18 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -64,27 +59,16 @@ fun GForceScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Floating Monitor Button
-            OutlinedButton(
-                onClick = {
+            // Monitor Card
+            GForceMonitorCard(
+                onOverlayClick = {
                     if (Settings.canDrawOverlays(context)) {
                         GForceOverlayService.startService(context)
                     } else {
                         showPermissionDialog = true
                     }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.OpenInNew,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(text = stringResource(R.string.gforce_overlay_start))
-            }
-
-            // Monitor Card
-            GForceMonitorCard()
+                }
+            )
 
             // Explanation Card
             GForceExplanationCard()

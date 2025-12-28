@@ -1,12 +1,15 @@
 package com.anxiousflyer.peacefulflight.model
 
+import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import com.google.gson.annotations.SerializedName
 
+@Keep
 data class WeatherResponse(
     @SerializedName("current") val current: CurrentWeather
 )
 
+@Keep
 data class CurrentWeather(
     @SerializedName("temperature_2m") val temperature: Double,
     @SerializedName("weather_code") val weatherCode: Int,

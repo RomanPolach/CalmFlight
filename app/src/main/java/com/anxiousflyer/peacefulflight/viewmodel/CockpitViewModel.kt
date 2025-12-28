@@ -43,6 +43,10 @@ class CockpitViewModel(
         }
     }
 
+    fun setWeatherError(errorRes: Int) {
+        _uiState.update { it.copy(weather = WeatherUiState(isLoading = false, errorRes = errorRes)) }
+    }
+
     fun refreshWeather() {
         _uiState.update { it.copy(weather = null) }
     }

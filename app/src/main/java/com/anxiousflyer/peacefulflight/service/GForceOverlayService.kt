@@ -5,25 +5,27 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.PixelFormat
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.WindowManager
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -32,7 +34,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,45 +59,37 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.anxiousflyer.peacefulflight.MainActivity
 import com.anxiousflyer.peacefulflight.R
+import com.anxiousflyer.peacefulflight.sensor.GForceSensorManager
 import com.anxiousflyer.peacefulflight.ui.theme.TealSoft
-import kotlin.Float
-import kotlin.Int
-import kotlin.String
-import kotlin.Suppress
-import kotlin.Unit
-import kotlin.apply
-import kotlin.collections.contains
-import kotlin.collections.minus
-import kotlin.collections.mutableListOf
-import kotlin.collections.plus
-import kotlin.compareTo
-import kotlin.div
-import kotlin.isInitialized
-import kotlin.let
 import kotlin.math.abs
-import kotlin.math.sqrt
-import kotlin.plus
-import kotlin.sequences.contains
-import kotlin.sequences.minus
-import kotlin.sequences.plus
-import kotlin.text.compareTo
-import kotlin.text.format
-import kotlin.text.plus
-import kotlin.text.toInt
-import kotlin.times
 
-class GForceOverlayService : Service(), SensorEventListener {
+class GForceOverlayService : Service() {
 
     private lateinit var windowManager: WindowManager
     private lateinit var composeView: ComposeView
-    private lateinit var sensorManager: SensorManager
-    private var accelerometer: Sensor? = null
+    private lateinit var sensorManager: GForceSensorManager
 
-    private val gForceState = mutableFloatStateOf(1.0f)
+    private val displayedGForceState = mutableFloatStateOf(1.0f)
     private val statusState = mutableStateOf(GForceStatus.SMOOTH)
+    private val historyState = mutableStateListOf<Float>()
 
-    private var smoothedValue = 9.81f
-    private val alpha = 0.05f
+    private val screenReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_ON -> {
+                    // Re-register sensor when screen turns on
+                    if (::sensorManager.isInitialized) {
+                        sensorManager.stop()
+                        setupSensor()
+                    }
+                }
+            }
+        }
+    }
+
+    // For displayed value stability (updates every 500ms)
+    private var lastDisplayUpdate = 0L
+    private val displayUpdateInterval = 500L
 
     // For status stability
     private val recentStatuses = mutableListOf<GForceStatus>()
@@ -109,11 +108,6 @@ class GForceOverlayService : Service(), SensorEventListener {
                 context.startService(intent)
             }
         }
-
-        fun stopService(context: Context) {
-            val intent = Intent(context, GForceOverlayService::class.java)
-            context.stopService(intent)
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -124,6 +118,7 @@ class GForceOverlayService : Service(), SensorEventListener {
         startForeground(NOTIFICATION_ID, createNotification())
         setupOverlay()
         setupSensor()
+        registerScreenReceiver()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -136,10 +131,22 @@ class GForceOverlayService : Service(), SensorEventListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        sensorManager.unregisterListener(this)
+        try {
+            unregisterReceiver(screenReceiver)
+        } catch (_: Exception) {}
+        if (::sensorManager.isInitialized) {
+            sensorManager.stop()
+        }
         if (::composeView.isInitialized) {
             windowManager.removeView(composeView)
         }
+    }
+
+    private fun registerScreenReceiver() {
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_ON)
+        }
+        registerReceiver(screenReceiver, filter)
     }
 
     private fun createNotificationChannel() {
@@ -219,8 +226,9 @@ class GForceOverlayService : Service(), SensorEventListener {
             setViewTreeSavedStateRegistryOwner(lifecycleOwner)
             setContent {
                 GForceOverlayContent(
-                    gForce = gForceState.floatValue,
+                    displayedGForce = displayedGForceState.floatValue,
                     status = statusState.value,
+                    history = historyState,
                     onClose = { stopSelf() }
                 )
             }
@@ -263,25 +271,26 @@ class GForceOverlayService : Service(), SensorEventListener {
     }
 
     private fun setupSensor() {
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        accelerometer?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
-        }
-    }
+        sensorManager = GForceSensorManager(this)
+        sensorManager.start { gForce ->
+            // Update history for graph (300 points like original)
+            historyState.add(gForce)
+            if (historyState.size > 300) {
+                historyState.removeAt(0)
+            }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        event?.let {
-            val x = it.values[0]
-            val y = it.values[1]
-            val z = it.values[2]
-
-            val currentRaw = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
-            smoothedValue = (currentRaw * alpha) + (smoothedValue * (1f - alpha))
-            val gForce = smoothedValue / 9.81f
-
-            // Update state
-            gForceState.floatValue = gForce
+            // Update displayed value every 500ms (like original)
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastDisplayUpdate >= displayUpdateInterval) {
+                lastDisplayUpdate = currentTime
+                if (historyState.isNotEmpty()) {
+                    val recentCount = minOf(historyState.size, 10)
+                    val recentHistory = historyState.takeLast(recentCount)
+                    // Find the most extreme value (furthest from 1.0G) in the recent history
+                    val maxDeviation = recentHistory.maxByOrNull { abs(it - 1.0f) } ?: 1.0f
+                    displayedGForceState.floatValue = maxDeviation
+                }
+            }
 
             // Calculate status
             val deviation = abs(gForce - 1.0f)
@@ -308,8 +317,6 @@ class GForceOverlayService : Service(), SensorEventListener {
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-
     enum class GForceStatus {
         SMOOTH, LIGHT_BUMPS, MODERATE, BUMPY
     }
@@ -317,10 +324,12 @@ class GForceOverlayService : Service(), SensorEventListener {
 
 @Composable
 private fun GForceOverlayContent(
-    gForce: Float,
+    displayedGForce: Float,
     status: GForceOverlayService.GForceStatus,
+    history: SnapshotStateList<Float>,
     onClose: () -> Unit
 ) {
+    val graphBackground = Color(0xFF1A3A3A)
     val statusColor = when (status) {
         GForceOverlayService.GForceStatus.SMOOTH,
         GForceOverlayService.GForceStatus.LIGHT_BUMPS -> TealSoft
@@ -338,7 +347,7 @@ private fun GForceOverlayContent(
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(Color(0xE6121212))
             .padding(12.dp)
     ) {
@@ -349,7 +358,9 @@ private fun GForceOverlayContent(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp)
             ) {
                 Text(
                     text = "G-FORCE",
@@ -371,11 +382,73 @@ private fun GForceOverlayContent(
             }
 
             Text(
-                text = String.format("%.2f G", gForce),
+                text = String.format("%.2f G", displayedGForce),
                 color = TealSoft,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold
             )
+
+            // Mini Graph - full width with distinct background
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+                    .height(80.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(graphBackground)
+            ) {
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    val width = size.width
+                    val height = size.height
+
+                    // Map Y axis: 0G -> bottom, 3G -> top (same as original)
+                    val mapY = { g: Float ->
+                        val clamped = g.coerceIn(0f, 3.0f)
+                        height - (clamped / 3.0f * height)
+                    }
+
+                    // Draw normal zone highlight (0.8 to 1.2G)
+                    drawRect(
+                        color = TealSoft.copy(alpha = 0.15f),
+                        topLeft = Offset(0f, mapY(1.2f)),
+                        size = androidx.compose.ui.geometry.Size(
+                            width,
+                            mapY(0.8f) - mapY(1.2f)
+                        )
+                    )
+
+                    // Draw 1.0G reference line
+                    drawLine(
+                        color = TealSoft.copy(alpha = 0.5f),
+                        start = Offset(0f, mapY(1.0f)),
+                        end = Offset(width, mapY(1.0f)),
+                        strokeWidth = 1.dp.toPx()
+                    )
+
+                    // Draw the history path
+                    if (history.isNotEmpty()) {
+                        val path = Path()
+                        val stepX = width / 300f
+
+                        history.forEachIndexed { index, g ->
+                            val x = width - ((history.size - 1 - index) * stepX)
+                            val y = mapY(g)
+
+                            if (index == 0) {
+                                path.moveTo(x, y)
+                            } else {
+                                path.lineTo(x, y)
+                            }
+                        }
+
+                        drawPath(
+                            path = path,
+                            color = TealSoft,
+                            style = Stroke(width = 2.dp.toPx())
+                        )
+                    }
+                }
+            }
 
             Text(
                 text = statusText,

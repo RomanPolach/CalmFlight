@@ -93,73 +93,75 @@ fun SectionCard(
     onToggle: () -> Unit,
     onItemClick: (String) -> Unit
 ) {
+    val cardColor = if (isExpanded)
+        MaterialTheme.colorScheme.primaryContainer
+    else
+        MaterialTheme.colorScheme.surfaceContainer
+
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = if (isExpanded) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer
+            containerColor = cardColor
         ),
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize()
     ) {
         Column {
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(160.dp) // Increased height for better banner appearance
                     .clickable { onToggle() }
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Section image with rounded corners and gradient overlay
+                // Background Image
                 section.imageRes?.let { imageRes ->
-                    val cardColor = if (isExpanded)
-                        MaterialTheme.colorScheme.primaryContainer
-                    else
-                        MaterialTheme.colorScheme.surfaceContainer
-
+                    Image(
+                        painter = painterResource(id = imageRes),
+                        contentDescription = stringResource(section.titleRes),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                    
+                    // Scrim/Overlay for readability
+                    // Vertical gradient at the bottom for the text area
                     Box(
                         modifier = Modifier
-                            .width(200.dp)
-                            .height(140.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                    ) {
-                        Image(
-                            painter = painterResource(id = imageRes),
-                            contentDescription = stringResource(section.titleRes),
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                        // Gradient overlay on right edge
-                        Box(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .width(40.dp)
-                                .align(Alignment.CenterEnd)
-                                .background(
-                                    Brush.horizontalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            cardColor
-                                        )
-                                    )
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        Color.Black.copy(alpha = 0.4f),
+                                        Color.Black.copy(alpha = 0.8f)
+                                    ),
+                                    startY = 100f // Start gradient later for cleaner image at top
                                 )
-                        )
-                    }
+                            )
+                    )
                 }
-                
-                Text(
-                    text = stringResource(section.titleRes),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (isExpanded) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
 
-                Icon(
-                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.Bottom // Align text and icon to the bottom
+                ) {
+                    Text(
+                        text = stringResource(section.titleRes),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.padding(bottom = 4.dp) // Subtle adjustment for icon alignment
+                    )
+                }
             }
 
             if (isExpanded) {

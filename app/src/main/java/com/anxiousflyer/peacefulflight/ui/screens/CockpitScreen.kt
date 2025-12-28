@@ -179,6 +179,8 @@ fun CockpitScreen(
                         onNavigateToTool = onNavigateToTool,
                         weatherState = uiState.weather,
                         onFetchWeather = viewModel::fetchWeather,
+                        onLocationError = viewModel::setWeatherError,
+                        onRetry = viewModel::refreshWeather,
                         isFlightActive = isFlightActive,
                         isMetric = uiState.isMetric
                     )
@@ -209,6 +211,8 @@ fun BoardingContent(
     onNavigateToTool: (String) -> Unit,
     weatherState: com.anxiousflyer.peacefulflight.model.WeatherUiState?,
     onFetchWeather: (Double, Double) -> Unit,
+    onLocationError: (Int) -> Unit,
+    onRetry: () -> Unit,
     isFlightActive: Boolean,
     isMetric: Boolean
 ) {
@@ -216,6 +220,8 @@ fun BoardingContent(
     WeatherWidget(
         weatherState = weatherState,
         onFetchWeather = onFetchWeather,
+        onLocationError = onLocationError,
+        onRetry = onRetry,
         isMetric = isMetric
     )
     
