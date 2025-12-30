@@ -151,6 +151,12 @@ fun RidingTheWaveScreen(
                         onClick = { viewModel.nextStep() },
                         modifier = Modifier.fillMaxWidth(0.6f)
                     )
+                } else {
+                    PrimaryButton(
+                        text = stringResource(R.string.finish_btn),
+                        onClick = { viewModel.finishSession(onFinish) },
+                        modifier = Modifier.fillMaxWidth(0.6f)
+                    )
                 }
             }
 

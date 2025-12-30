@@ -70,8 +70,4 @@ class CockpitViewModel(
         }
     }
 
-    fun getRecommendedTools(): List<Tool> {
-        // Just return top 2 for dashboard
-        return AppContent.tools.take(2)
-    }
 }

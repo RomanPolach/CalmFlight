@@ -62,34 +62,6 @@ fun GuidedInterventionScreen(
         scrollState.animateScrollTo(0)
     }
 
-    if (uiState.showSuccessDialog) {
-        AlertDialog(
-            onDismissRequest = { viewModel.closeDialog(onFinish) },
-            confirmButton = {
-                TextButton(onClick = { viewModel.closeDialog(onFinish) }) {
-                    Text(
-                        stringResource(R.string.close_btn),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            },
-            title = {
-                Text(
-                    stringResource(R.string.congrats_title),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            },
-            text = {
-                Text(
-                    stringResource(R.string.congrats_msg),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            },
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurface
-        )
-    }
 
     Scaffold(
         topBar = {
@@ -166,6 +138,7 @@ fun GuidedInterventionScreen(
             
             Spacer(modifier = Modifier.height(20.dp))
         }
+
         }
     }
 }

@@ -17,21 +17,4 @@ class SosViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SosUiState())
     val uiState: StateFlow<SosUiState> = _uiState.asStateFlow()
 
-    fun toggleSos(active: Boolean) {
-        _uiState.update { it.copy(isActive = active) }
-    }
-
-    // Dummy logic for breathing animation cycle
-    suspend fun startBreathingCycle() {
-        while (_uiState.value.isActive) {
-            _uiState.update { it.copy(breathingTextRes = R.string.breathe_in) }
-            delay(4000)
-            if (!_uiState.value.isActive) break
-            _uiState.update { it.copy(breathingTextRes = R.string.hold) }
-            delay(2000)
-            if (!_uiState.value.isActive) break
-            _uiState.update { it.copy(breathingTextRes = R.string.breathe_out) }
-            delay(4000)
-        }
-    }
 }

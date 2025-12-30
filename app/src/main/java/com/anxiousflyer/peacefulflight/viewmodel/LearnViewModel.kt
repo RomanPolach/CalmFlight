@@ -24,8 +24,5 @@ class LearnViewModel : ViewModel() {
         }
     }
 
-    fun getItemById(itemId: String): LearnItem? {
-        return _uiState.value.sections.flatMap { it.items }.find { it.id == itemId }
-    }
 }
 

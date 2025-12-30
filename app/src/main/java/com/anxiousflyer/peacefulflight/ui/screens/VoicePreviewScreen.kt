@@ -120,7 +120,7 @@ fun VoicePreviewScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = String.format("%.1fx", uiState.speechRate),
+                            text = String.format(java.util.Locale.US, "%.1fx", uiState.speechRate),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.primary
                         )

@@ -17,10 +17,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -113,6 +114,13 @@ fun CockpitScreen(
                 title = stringResource(R.string.cockpit_title),
                 onBackClick = null,
                 actions = {
+                    IconButton(onClick = onNavigateToSos) {
+                        Icon(
+                            Icons.Default.HealthAndSafety,
+                            contentDescription = stringResource(R.string.nav_sos),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                     IconButton(onClick = { viewModel.toggleSettingsDialog(true) }) {
                         Icon(
                             Icons.Default.Settings,
@@ -139,7 +147,7 @@ fun CockpitScreen(
             contentColor = MaterialTheme.colorScheme.primary,
             edgePadding = 0.dp,
             indicator = { tabPositions ->
-                TabRowDefaults.Indicator(
+                TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -175,7 +183,6 @@ fun CockpitScreen(
             ) {
                 when (currentPhase) {
                     FlightStatus.BOARDING -> BoardingContent(
-                        onNavigateToTool = onNavigateToTool,
                         weatherState = uiState.weather,
                         onFetchWeather = viewModel::fetchWeather,
                         onLocationError = viewModel::setWeatherError,
@@ -207,7 +214,6 @@ fun CockpitScreen(
 
 @Composable
 fun BoardingContent(
-    onNavigateToTool: (String) -> Unit,
     weatherState: com.anxiousflyer.peacefulflight.model.WeatherUiState?,
     onFetchWeather: (Double, Double) -> Unit,
     onLocationError: (Int) -> Unit,
@@ -279,7 +285,7 @@ fun CruiseContent(
     ToolShortcutCard(
         title = stringResource(R.string.ftf_title),
         description = stringResource(R.string.tool_shortcut_desc_ftf),
-        icon = Icons.Default.ArrowForward,
+        icon = Icons.AutoMirrored.Filled.ArrowForward,
         onClick = { onNavigateToTool("8") }
     )
     
