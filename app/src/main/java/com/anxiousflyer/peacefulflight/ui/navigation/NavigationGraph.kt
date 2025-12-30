@@ -108,7 +108,6 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                         "12" -> navController.navigate(Screen.SelfCompassion.route)
                         "13" -> navController.navigate(Screen.CatastrophicThinking.route)
                         "14" -> navController.navigate(Screen.VoiceSettings.route)
-                        // "15" -> navController.navigate(Screen.Breathing.route)
                     }
                 }
             )
@@ -264,14 +263,5 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
                 }
             )
         }
-        /*
-        composable(Screen.Breathing.route) {
-            com.anxiousflyer.peacefulflight.ui.screens.BreathingExerciseScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-        */
     }
 }
