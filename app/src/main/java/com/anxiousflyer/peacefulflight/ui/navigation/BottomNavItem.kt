@@ -32,4 +32,5 @@ sealed class Screen(val route: String) {
     object HelpOptions : Screen("help_options")
     object SelfCompassion : Screen("self_compassion")
     object VoiceSettings : Screen("voice_settings")
+    object Breathing : Screen("breathing")
 }
