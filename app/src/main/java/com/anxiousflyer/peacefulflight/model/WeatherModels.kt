@@ -21,7 +21,8 @@ data class CockpitUiState(
     val weather: WeatherUiState? = null,
     val isMetric: Boolean = false,
     val showSettingsDialog: Boolean = false,
-    val themeMode: com.anxiousflyer.peacefulflight.data.preferences.PreferencesManager.ThemeMode = com.anxiousflyer.peacefulflight.data.preferences.PreferencesManager.ThemeMode.SYSTEM
+    val themeMode: com.anxiousflyer.peacefulflight.data.preferences.PreferencesManager.ThemeMode = com.anxiousflyer.peacefulflight.data.preferences.PreferencesManager.ThemeMode.SYSTEM,
+    val isFlightActive: Boolean = false
 )
 
 data class WeatherUiState(

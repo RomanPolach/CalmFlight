@@ -8,6 +8,7 @@ import com.anxiousflyer.peacefulflight.utils.TtsManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class VoiceInfo(
@@ -18,37 +19,39 @@ data class VoiceInfo(
     val gender: String
 )
 
+data class VoicePreviewUiState(
+    val voices: List<VoiceInfo> = emptyList(),
+    val currentVoice: Voice? = null,
+    val isSpeaking: Boolean = false,
+    val selectedVoice: Voice? = null,
+    val speechRate: Float = PreferencesManager.DEFAULT_SPEECH_RATE,
+    val isLoading: Boolean = true
+)
+
 class VoicePreviewViewModel(
     private val ttsManager: TtsManager,
     private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
-    private val _voices = MutableStateFlow<List<VoiceInfo>>(emptyList())
-    val voices: StateFlow<List<VoiceInfo>> = _voices.asStateFlow()
-
-    private val _currentVoice = MutableStateFlow<Voice?>(null)
-    val currentVoice: StateFlow<Voice?> = _currentVoice.asStateFlow()
-
-    private val _isSpeaking = MutableStateFlow(false)
-    val isSpeaking: StateFlow<Boolean> = _isSpeaking.asStateFlow()
-
-    private val _selectedVoice = MutableStateFlow<Voice?>(null)
-    val selectedVoice: StateFlow<Voice?> = _selectedVoice.asStateFlow()
-
-    private val _speechRate = MutableStateFlow(PreferencesManager.DEFAULT_SPEECH_RATE)
-    val speechRate: StateFlow<Float> = _speechRate.asStateFlow()
-
-    val isLoading: StateFlow<Boolean> = ttsManager.isInitialized
+    private val _uiState = MutableStateFlow(VoicePreviewUiState())
+    val uiState: StateFlow<VoicePreviewUiState> = _uiState.asStateFlow()
 
     init {
-        _speechRate.value = preferencesManager.getTtsSpeechRate()
+        val rate = preferencesManager.getTtsSpeechRate()
+        _uiState.update { it.copy(speechRate = rate) }
         
         viewModelScope.launch {
             ttsManager.isInitialized.collect { initialized ->
                 if (initialized) {
                     loadVoices()
-                    _currentVoice.value = ttsManager.getTts()?.voice
-                    _selectedVoice.value = _currentVoice.value
+                    val voice = ttsManager.getTts()?.voice
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            currentVoice = voice,
+                            selectedVoice = voice
+                        )
+                    }
                 }
             }
         }
@@ -64,7 +67,7 @@ class VoicePreviewViewModel(
                     !it.isNetworkConnectionRequired
         }.sortedByDescending { it.quality }
 
-        _voices.value = localEnglishVoices.map { voice ->
+        val voiceInfos = localEnglishVoices.map { voice ->
             VoiceInfo(
                 voice = voice,
                 displayName = formatVoiceName(voice.name),
@@ -73,6 +76,7 @@ class VoicePreviewViewModel(
                 gender = detectGender(voice.name)
             )
         }
+        _uiState.update { it.copy(voices = voiceInfos) }
     }
 
     private fun formatVoiceName(name: String): String {
@@ -114,7 +118,7 @@ class VoicePreviewViewModel(
     fun previewVoice(voiceInfo: VoiceInfo) {
         ttsManager.stop()
         ttsManager.setVoice(voiceInfo.voice)
-        _selectedVoice.value = voiceInfo.voice
+        _uiState.update { it.copy(selectedVoice = voiceInfo.voice) }
         
         val sampleText = "You are safe. The plane is flying normally. Take a deep breath and relax."
         ttsManager.speak(sampleText)
@@ -122,8 +126,12 @@ class VoicePreviewViewModel(
 
     fun selectVoice(voiceInfo: VoiceInfo) {
         ttsManager.setVoice(voiceInfo.voice)
-        _selectedVoice.value = voiceInfo.voice
-        _currentVoice.value = voiceInfo.voice
+        _uiState.update {
+            it.copy(
+                selectedVoice = voiceInfo.voice,
+                currentVoice = voiceInfo.voice
+            )
+        }
         // Save to preferences
         preferencesManager.setTtsVoiceName(voiceInfo.voice.name)
     }
@@ -133,7 +141,7 @@ class VoicePreviewViewModel(
     }
 
     fun setSpeechRate(rate: Float) {
-        _speechRate.value = rate
+        _uiState.update { it.copy(speechRate = rate) }
         ttsManager.setSpeechRate(rate)
         preferencesManager.setTtsSpeechRate(rate)
     }

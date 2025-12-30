@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -55,11 +54,7 @@ fun VoicePreviewScreen(
     viewModel: VoicePreviewViewModel = koinViewModel(),
     onBack: () -> Unit
 ) {
-    val voices by viewModel.voices.collectAsState()
-    val selectedVoice by viewModel.selectedVoice.collectAsState()
-    val isSpeaking by viewModel.isSpeaking.collectAsState()
-    val isInitialized by viewModel.isLoading.collectAsState()
-    val speechRate by viewModel.speechRate.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     DisposableEffect(Unit) {
         onDispose {
@@ -125,7 +120,7 @@ fun VoicePreviewScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = String.format("%.1fx", speechRate),
+                            text = String.format("%.1fx", uiState.speechRate),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -134,7 +129,7 @@ fun VoicePreviewScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     Slider(
-                        value = speechRate,
+                        value = uiState.speechRate,
                         onValueChange = { viewModel.setSpeechRate(it) },
                         valueRange = 0.7f..1.2f,
                         steps = 4,
@@ -164,7 +159,7 @@ fun VoicePreviewScreen(
             
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (!isInitialized) {
+            if (uiState.isLoading) {
                 // Loading state
                 Box(
                     modifier = Modifier
@@ -176,7 +171,7 @@ fun VoicePreviewScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
-            } else if (voices.isEmpty()) {
+            } else if (uiState.voices.isEmpty()) {
                 // Empty state
                 Box(
                     modifier = Modifier
@@ -195,10 +190,10 @@ fun VoicePreviewScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(voices) { voiceInfo ->
+                    items(uiState.voices) { voiceInfo ->
                         VoiceCard(
                             voiceInfo = voiceInfo,
-                            isSelected = selectedVoice?.name == voiceInfo.voice.name,
+                            isSelected = uiState.selectedVoice?.name == voiceInfo.voice.name,
                             onPlayClick = { viewModel.previewVoice(voiceInfo) },
                             onSelectClick = { viewModel.selectVoice(voiceInfo) }
                         )

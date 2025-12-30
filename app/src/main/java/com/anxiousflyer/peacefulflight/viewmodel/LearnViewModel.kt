@@ -7,20 +7,25 @@ import com.anxiousflyer.peacefulflight.model.LearnSection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class LearnUiState(
+    val sections: List<LearnSection> = emptyList(),
+    val expandedSectionId: String? = null
+)
 
 class LearnViewModel : ViewModel() {
-    private val _sections = MutableStateFlow(AppContent.learnSections)
-    val sections: StateFlow<List<LearnSection>> = _sections.asStateFlow()
-
-    private val _expandedSection = MutableStateFlow<String?>(null)
-    val expandedSection: StateFlow<String?> = _expandedSection.asStateFlow()
+    private val _uiState = MutableStateFlow(LearnUiState(sections = AppContent.learnSections))
+    val uiState: StateFlow<LearnUiState> = _uiState.asStateFlow()
 
     fun toggleSection(sectionId: String) {
-        _expandedSection.value = if (_expandedSection.value == sectionId) null else sectionId
+        _uiState.update {
+            it.copy(expandedSectionId = if (it.expandedSectionId == sectionId) null else sectionId)
+        }
     }
 
     fun getItemById(itemId: String): LearnItem? {
-        return _sections.value.flatMap { it.items }.find { it.id == itemId }
+        return _uiState.value.sections.flatMap { it.items }.find { it.id == itemId }
     }
 }
 

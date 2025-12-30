@@ -49,26 +49,20 @@ fun GuidedInterventionScreen(
         viewModel.initialize(steps)
     }
 
-    val currentTextRes by viewModel.currentTextRes.collectAsState()
-    val currentStepIndex by viewModel.currentStepIndex.collectAsState()
-    val isLastStep by viewModel.isLastStep.collectAsState()
-    val anxietyScore by viewModel.anxietyScore.collectAsState()
-    val feedbackRes by viewModel.feedbackMessageRes.collectAsState()
-    val showSuccessDialog by viewModel.showSuccessDialog.collectAsState()
-    val isAutoPlayEnabled by viewModel.isAutoPlayEnabled.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
     
     // Handle empty initial state safely
-    if (currentTextRes == 0) return
+    if (uiState.currentTextRes == 0) return
 
-    val currentText = stringResource(currentTextRes)
+    val currentText = stringResource(uiState.currentTextRes)
     
     // Auto-scroll to top when step changes
-    LaunchedEffect(currentStepIndex) {
+    LaunchedEffect(uiState.currentStepIndex) {
         scrollState.animateScrollTo(0)
     }
 
-    if (showSuccessDialog) {
+    if (uiState.showSuccessDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.closeDialog(onFinish) },
             confirmButton = {
@@ -137,7 +131,7 @@ fun GuidedInterventionScreen(
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
-                            imageVector = if (isAutoPlayEnabled) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
+                            imageVector = if (uiState.isAutoPlayEnabled) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
                             contentDescription = "Read aloud",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(28.dp)
@@ -152,8 +146,8 @@ fun GuidedInterventionScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            if (!isLastStep) {
-                val nextStepIndex = viewModel.currentStepIndex.collectAsState().value + 1
+            if (!uiState.isLastStep) {
+                val nextStepIndex = uiState.currentStepIndex + 1
                 val nextStepText = if (nextStepIndex < steps.size) stringResource(steps[nextStepIndex]) else ""
                 
                 PrimaryButton(

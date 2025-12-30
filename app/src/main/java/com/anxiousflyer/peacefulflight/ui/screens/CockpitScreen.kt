@@ -65,7 +65,6 @@ fun CockpitScreen(
     onNavigateToLearn: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isFlightActive by viewModel.isFlightActive.collectAsState()
 
     // Inject preferences manager for the dialog
     val preferencesManager: PreferencesManager = org.koin.compose.koinInject()
@@ -181,7 +180,7 @@ fun CockpitScreen(
                         onFetchWeather = viewModel::fetchWeather,
                         onLocationError = viewModel::setWeatherError,
                         onRetry = viewModel::refreshWeather,
-                        isFlightActive = isFlightActive,
+                        isFlightActive = uiState.isFlightActive,
                         isMetric = uiState.isMetric
                     )
                     FlightStatus.TAKEOFF -> TakeoffContent(

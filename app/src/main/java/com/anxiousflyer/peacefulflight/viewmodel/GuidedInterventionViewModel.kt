@@ -5,114 +5,109 @@ import com.anxiousflyer.peacefulflight.utils.TtsManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class GuidedInterventionUiState(
+    val steps: List<Int> = emptyList(),
+    val currentStepIndex: Int = 0,
+    val currentTextRes: Int = 0,
+    val isLastStep: Boolean = false,
+    val anxietyScore: Float = 5f,
+    val feedbackMessageRes: Int? = null,
+    val showSuccessDialog: Boolean = false,
+    val isAutoPlayEnabled: Boolean = false
+)
 
 class GuidedInterventionViewModel(
     private val ttsManager: TtsManager,
-    // In a real app, you'd inject a repository to get steps by tool ID
-    // For now, we'll initialize with data directly or via a setter
 ) : ViewModel() {
 
-    private val _steps = MutableStateFlow<List<Int>>(emptyList())
-    val steps: StateFlow<List<Int>> = _steps.asStateFlow()
-
-    private val _currentStepIndex = MutableStateFlow(0)
-    val currentStepIndex: StateFlow<Int> = _currentStepIndex.asStateFlow()
-
-    private val _currentTextRes = MutableStateFlow(0)
-    val currentTextRes: StateFlow<Int> = _currentTextRes.asStateFlow()
-
-    private val _isLastStep = MutableStateFlow(false)
-    val isLastStep: StateFlow<Boolean> = _isLastStep.asStateFlow()
-
-    private val _anxietyScore = MutableStateFlow(5f)
-    val anxietyScore: StateFlow<Float> = _anxietyScore.asStateFlow()
-
-    private val _feedbackMessageRes = MutableStateFlow<Int?>(null)
-    val feedbackMessageRes: StateFlow<Int?> = _feedbackMessageRes.asStateFlow()
+    private val _uiState = MutableStateFlow(GuidedInterventionUiState())
+    val uiState: StateFlow<GuidedInterventionUiState> = _uiState.asStateFlow()
 
     private val _anxietyHistory = mutableListOf<Float>()
-
-    private val _showSuccessDialog = MutableStateFlow(false)
-    val showSuccessDialog: StateFlow<Boolean> = _showSuccessDialog.asStateFlow()
-
-    private val _isAutoPlayEnabled = MutableStateFlow(false)
-    val isAutoPlayEnabled: StateFlow<Boolean> = _isAutoPlayEnabled.asStateFlow()
-
     private var isInitialized = false
 
     fun initialize(stepResIds: List<Int>) {
         if (!isInitialized && stepResIds.isNotEmpty()) {
-            _steps.value = stepResIds
-            _currentStepIndex.value = 0
-            _currentTextRes.value = stepResIds[0]
-            _isLastStep.value = stepResIds.size == 1
-            _isAutoPlayEnabled.value = false
+            _uiState.update {
+                it.copy(
+                    steps = stepResIds,
+                    currentStepIndex = 0,
+                    currentTextRes = stepResIds[0],
+                    isLastStep = stepResIds.size == 1,
+                    isAutoPlayEnabled = false
+                )
+            }
             isInitialized = true
         }
     }
 
     fun toggleTts(text: String) {
-        if (_isAutoPlayEnabled.value) {
+        if (_uiState.value.isAutoPlayEnabled) {
             ttsManager.stop()
-            _isAutoPlayEnabled.value = false
+            _uiState.update { it.copy(isAutoPlayEnabled = false) }
         } else {
             ttsManager.speak(text)
-            _isAutoPlayEnabled.value = true
+            _uiState.update { it.copy(isAutoPlayEnabled = true) }
         }
     }
 
     fun nextStep(nextText: String) {
         ttsManager.stop() // Stop previous audio
-        if (_currentStepIndex.value < _steps.value.size - 1) {
-            _currentStepIndex.value += 1
-            _currentTextRes.value = _steps.value[_currentStepIndex.value]
-            _isLastStep.value = _currentStepIndex.value == _steps.value.size - 1
+        val state = _uiState.value
+        if (state.currentStepIndex < state.steps.size - 1) {
+            val newIndex = state.currentStepIndex + 1
+            _uiState.update {
+                it.copy(
+                    currentStepIndex = newIndex,
+                    currentTextRes = it.steps[newIndex],
+                    isLastStep = newIndex == it.steps.size - 1
+                )
+            }
 
-            if (_isAutoPlayEnabled.value) {
+            if (state.isAutoPlayEnabled) {
                 ttsManager.speak(nextText)
             }
         }
     }
     
     fun updateAnxietyScore(score: Float) {
-        _anxietyScore.value = score
+        _uiState.update { it.copy(anxietyScore = score) }
     }
 
     fun submitRating() {
-        val currentScore = _anxietyScore.value
+        val currentScore = _uiState.value.anxietyScore
         _anxietyHistory.add(currentScore)
 
         if (_anxietyHistory.size > 1) {
             val previousScore = _anxietyHistory[_anxietyHistory.size - 2]
-            if (currentScore < previousScore) {
-                _feedbackMessageRes.value =
-                    com.anxiousflyer.peacefulflight.R.string.feedback_improving
-            } else if (currentScore > previousScore) {
-                _feedbackMessageRes.value =
-                    com.anxiousflyer.peacefulflight.R.string.feedback_worsening
-            } else {
-                _feedbackMessageRes.value = com.anxiousflyer.peacefulflight.R.string.feedback_steady
+            val feedback = when {
+                currentScore < previousScore -> com.anxiousflyer.peacefulflight.R.string.feedback_improving
+                currentScore > previousScore -> com.anxiousflyer.peacefulflight.R.string.feedback_worsening
+                else -> com.anxiousflyer.peacefulflight.R.string.feedback_steady
             }
+            _uiState.update { it.copy(feedbackMessageRes = feedback) }
         } else {
-             _feedbackMessageRes.value = null
+            _uiState.update { it.copy(feedbackMessageRes = null) }
         }
     }
 
     fun finishSession(onFinish: () -> Unit) {
         ttsManager.stop()
-        val finalScore = _anxietyScore.value
+        val finalScore = _uiState.value.anxietyScore
         val initialScore = _anxietyHistory.firstOrNull() ?: 5f
 
         // Success logic: Score dropped by at least 2 OR final score is low (<= 4)
         if ((initialScore - finalScore >= 2) || finalScore <= 4) {
-            _showSuccessDialog.value = true
+            _uiState.update { it.copy(showSuccessDialog = true) }
         } else {
             onFinish()
         }
     }
 
     fun closeDialog(onFinish: () -> Unit) {
-        _showSuccessDialog.value = false
+        _uiState.update { it.copy(showSuccessDialog = false) }
         onFinish()
     }
     

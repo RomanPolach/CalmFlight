@@ -6,28 +6,31 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class SosUiState(
+    val isActive: Boolean = false,
+    val breathingTextRes: Int = R.string.breathe_in
+)
 
 class SosViewModel : ViewModel() {
-    private val _isActive = MutableStateFlow(false)
-    val isActive: StateFlow<Boolean> = _isActive.asStateFlow()
-
-    private val _breathingTextRes = MutableStateFlow(R.string.breathe_in)
-    val breathingTextRes: StateFlow<Int> = _breathingTextRes.asStateFlow()
+    private val _uiState = MutableStateFlow(SosUiState())
+    val uiState: StateFlow<SosUiState> = _uiState.asStateFlow()
 
     fun toggleSos(active: Boolean) {
-        _isActive.value = active
+        _uiState.update { it.copy(isActive = active) }
     }
 
     // Dummy logic for breathing animation cycle
     suspend fun startBreathingCycle() {
-        while(_isActive.value) {
-            _breathingTextRes.value = R.string.breathe_in
+        while (_uiState.value.isActive) {
+            _uiState.update { it.copy(breathingTextRes = R.string.breathe_in) }
             delay(4000)
-            if (!_isActive.value) break
-            _breathingTextRes.value = R.string.hold
+            if (!_uiState.value.isActive) break
+            _uiState.update { it.copy(breathingTextRes = R.string.hold) }
             delay(2000)
-            if (!_isActive.value) break
-            _breathingTextRes.value = R.string.breathe_out
+            if (!_uiState.value.isActive) break
+            _uiState.update { it.copy(breathingTextRes = R.string.breathe_out) }
             delay(4000)
         }
     }
