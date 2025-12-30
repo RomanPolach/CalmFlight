@@ -93,7 +93,9 @@ fun SosScreen(
         ) {
             // Top Bar with Close Button
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
                 horizontalArrangement = Arrangement.End
             ) {
                 IconButton(
