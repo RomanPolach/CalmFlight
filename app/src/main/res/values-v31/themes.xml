@@ -4,7 +4,8 @@
     <style name="Theme.PeacefulFlight" parent="android:Theme.Material.Light.NoActionBar">
         <!-- Splash Screen (Android 12+) -->
         <item name="android:windowSplashScreenBackground">@color/splash_background</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
-        <item name="android:windowSplashScreenIconBackgroundColor">@color/splash_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
     </style>
+
+    <style name="Theme.PeacefulFlight.Main" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
