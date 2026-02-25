@@ -8,6 +8,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.SideEffect
+import androidx.core.view.WindowCompat
 import com.anxiousflyer.peacefulflight.data.preferences.PreferencesManager
 import com.anxiousflyer.peacefulflight.ui.MainScreen
 import com.anxiousflyer.peacefulflight.ui.theme.PeacefulFlightTheme
@@ -27,6 +29,12 @@ class MainActivity : ComponentActivity() {
                 PreferencesManager.ThemeMode.LIGHT -> false
                 PreferencesManager.ThemeMode.DARK -> true
                 PreferencesManager.ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+
+            SideEffect {
+                val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+                insetsController.isAppearanceLightStatusBars = !darkTheme
+                insetsController.isAppearanceLightNavigationBars = !darkTheme
             }
 
             PeacefulFlightTheme(darkTheme = darkTheme) {

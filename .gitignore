@@ -16,3 +16,10 @@ local.properties
 CLAUDE.md
 .idea/
 .kotlin/
+
+# IDE
+.vscode/
+
+# Build artifacts
+*.apk
+*.aab
