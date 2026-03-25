@@ -2,6 +2,8 @@ package com.anxiousflyer.peacefulflight
 
 import android.app.Application
 import com.anxiousflyer.peacefulflight.di.appModule
+import com.google.firebase.FirebaseApp
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -14,6 +16,10 @@ class PeacefulFlight : Application() {
             androidLogger()
             androidContext(this@PeacefulFlight)
             modules(appModule)
+        }
+
+        if (FirebaseApp.getApps(this).isNotEmpty()) {
+            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
         }
     }
 }

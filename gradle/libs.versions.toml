@@ -16,6 +16,9 @@ retrofit = "2.11.0"
 gson = "2.10.1"
 playServicesLocation = "21.0.1"
 coreSplashscreen = "1.0.1"
+googleServices = "4.4.4"
+firebaseCrashlyticsGradle = "3.0.6"
+firebaseBom = "34.7.0"
 
 
 [libraries]
@@ -45,9 +48,14 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsGradle" }

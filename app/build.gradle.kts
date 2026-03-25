@@ -5,6 +5,13 @@ plugins {
     id("com.google.devtools.ksp") version "2.0.21-1.0.25"
 }
 
+val firebaseConfigExists = file("google-services.json").exists()
+
+if (firebaseConfigExists) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+}
+
 android {
     namespace = "com.anxiousflyer.peacefulflight"
     compileSdk = 36
@@ -13,7 +20,7 @@ android {
         applicationId = "com.anxiousflyer.peacefulflight"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
+        versionCode = 4
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -51,6 +58,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
@@ -78,6 +86,9 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.gson)
     implementation(libs.play.services.location)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
